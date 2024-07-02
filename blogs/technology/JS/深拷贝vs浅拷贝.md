@@ -169,11 +169,8 @@ target.target = target;
 很明显，因为递归进入死循环导致栈内存溢出了。针对这种情况的解决方案是可以额外开辟一个存储空间，来存储当前对象和拷贝对象的对应关系，当需要拷贝当前对象时，先去存储空间中找，有没有拷贝过这个对象，如果有的话直接返回，如果没有的话继续拷贝。我们可以选择Map这种数据结构：
 
 检查map中有无克隆过的对象
-
-- 有 - 直接返回
-
-- 没有 - 将当前对象作为key，克隆对象作为value进行存储
-
+有 - 直接返回
+没有 - 将当前对象作为key，克隆对象作为value进行存储
 继续克隆
 
 ```js
@@ -214,7 +211,6 @@ const targetCopy = deepClone(target)
 ```
 
 输出
-
 ![output](./assets/copy/output.png "output")
 
 ## 性能优化
@@ -225,7 +221,7 @@ const targetCopy = deepClone(target)
 
 可以看到，while的效率是最好的，所以，我们可以想办法把for in遍历改变为while遍历。
 
-参考
+## 参考
 
-[](https://segmentfault.com/a/1190000020255831?u_atoken=5f056195-4e25-4102-bf4d-34759c002cf6&u_asig=2760822017189540453518785eac30&u_aref=QQ5gGW8fS2LWQwcdne4ZDAfoDgw%3D)
-[](https://juejin.cn/post/7302348032543850508)
+[如何写出一个惊艳面试官的深拷贝](https://segmentfault.com/a/1190000020255831)
+[手写一个浅拷贝和一个深拷贝](https://juejin.cn/post/7302348032543850508)
