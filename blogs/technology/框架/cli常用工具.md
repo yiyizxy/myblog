@@ -120,6 +120,16 @@ npm link
 
 ```js
 
+program
+  .command('create <app-name>')
+  .description('create a new project')
+  .options('-f, --force', 'overwrite target directory if it exist')
+  .action((name, options) => {
+
+  })
+
+propgram.parse(process.argvs)
+
 ```
 
 `npm-run-all`: 用于并行或串行运行多个 npm script 的工具包
