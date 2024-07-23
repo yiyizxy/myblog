@@ -33,5 +33,32 @@ apply(this, [params1, param2])
 ### bind实现
 
 ```js
-bind(this, param1,param2,param3)
+bind(this, param1, param2, param3)
+```
+
+### 手撕bind
+
+```js
+Function.prototype.myBind = function () {
+    const _this = this
+    const args = Array.prototype.slice.call(arguments)
+    const newThis = args.shift()
+
+    return function() {
+        return _this.myApply(newThis, args)
+    }
+}
+
+Function.prototye.myApply = function(context) {
+    context = context || window
+    // 挂载执行函数
+    context.fn = this
+
+    let result = arguments[1] ? context.fn(...arguments[1]) : context.fn()
+
+    delete context.fn()
+
+    return result
+
+}
 ```

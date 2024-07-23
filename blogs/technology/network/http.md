@@ -106,15 +106,15 @@ HTTP状态码分类：
 - 501 Not Implemented：服务器不支持请求的功能，无法完成请求。
 - 503 Service Unavailable：服务器暂时不可用，通常是由于过载或维护。当发送一个导致服务器暂时不可用的请求，此时查看服务器返回的状态码为 503 Service Unavailable。 这个状态码表示服务器暂时无法处理请求，通常是由于服务器过载、维护或其他暂时性问题。客户端通常可以在稍后重试该请求。例如，当网站维护时，服务器可能返回503状态码。
 
-XMLHttpRequest实现
+## XMLHttpRequest实现
 
 XMLHttpRequest（XHR）是一个浏览器内置的对象，允许JavaScript发起HTTP(S)请求
 
 ```js
 // 创建XMLHttpRequest对象
-var xml = new XMLHttpRequest()
+var xhr = new XMLHttpRequest()
 // 配置请求方法,包括请求方法、URL、是否异步、用于进行HTTP认证的用户名、用于HTTP认证的密码
-xml.open('GET', 'http://example.com/api', true, 'username[可选]', 'password[可选]')
+xhr.open('GET', 'http://example.com/api', true, 'username[可选]', 'password[可选]')
 // 设置请求头(可选)
 xhr.setRequestHeader('Content-Type', 'application/json')
 // 设置响应类型（可选）
@@ -133,11 +133,95 @@ xhr.onreadyStateChange = function () {
  xhr.send(null);
 // 取消请求（可选）
 如果需要取消已经发出的请求，可以使用abort方法。
-  
- // 其他方法
  
+ // 超时
+ xhr.timeout = 1000;
+
+ // 超时触发方法
+ xhr.ontimeout = () => {
+ }
+ // 其他方法
 const contentType = xhr.getResponseHeader("Content-Type"); // 获取某个响应头
 const headers = xhr.getAllResponseHeaders(); // 获取所有响应头信息
+
+// xhr.readyState
+// 0-尚未调用open
+// 1-已调用open
+// 2-已调用send
+// 3-已接收请求返回数据
+// 4-已完成请求
+```
+
+## 手撕ajax
+
+实现一个如下ajax功能
+
+```js
+ajax({
+  url: 'urltest',
+  method: 'get',
+  async: true,
+  timeout: 3000,
+  data: {
+    payload: 'text'
+  }
+}).then(res => console.log('success'), err => console.log('fail'))
+```
+
+实现
+
+```js
+function ajax(options) {
+	const { url, method, async, timeout, data } = options
+	const xhr = new XMLHttpRequest()
+	return new Promise((resolve, reject) => {
+		xhr.onreadyStateChange = function () {
+			if (xhr.readyState === 4) {
+				if (xhr.status === 200) {
+					resolve && resolve(xhr.responseText)
+				} else {
+					reject && reject()
+				}
+			}
+		}
+		// 超时
+		xhr.timeout = () => reject && reject('超时')
+		xhr.onerror = (err) => reject && reject(err)
+
+		let _params = []
+		let encodeData
+
+        // 参数处理
+		if (data instanceOf Object) {
+			for (lei key in data) {
+				_params.push(`${encodeURIComponent(key)}=${encodeURIComponent(Object[key])}`)
+			}
+			encodeData = _params.join('&')
+		}
+
+		// 方法处理
+		if (method === 'get') {
+			const index = url.indexOf('?')
+			if (index === -1) {
+				url += '?'
+			} else {
+				url += '&'
+			}
+			url += encodeData
+		}
+
+        // 建立连接
+		xhr.open(method, url, async)
+
+		if (method === 'get') {
+			xhr.send(null)
+		} else {
+			xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded;chartset=UTF-8')
+			xhr.send(encodeData)
+		}
+	})
+}
+
 ```
 
 ## HTTPS
