@@ -7,6 +7,8 @@ categories:
  - 框架
 ---
 
+## webpack5.0优化点
+
 ## Hot Module Replacement(HMR)
 第一步，在 webpack 的 watch 模式下，文件系统中某一个文件发生修改，webpack 监听到文件变化，根据配置文件对模块重新编译打包，并将打包后的代码通过简单的 JavaScript 对象保存在内存中。
 第二步是 webpack-dev-server 和 webpack 之间的接口交互，而在这一步，主要是 dev-server 的中间件 webpack-dev-middleware 和 webpack 之间的交互，webpack-dev-middleware 调用 webpack 暴露的 API对代码变化进行监控，并且告诉 webpack，将代码打包到内存中。
@@ -47,6 +49,18 @@ webpack-dev-middleware扮演是中间件的角色，一头可以调用webpack暴
 模块热更新的错误处理，如果在热更新过程中出现错误，热更新将回退到刷新浏览器
 面试题：说一下webpack的热更新原理？
 webpack通过watch可以监测代码的变化；webpack-dev-middleware可以调用webpack暴露的API检测代码变化，并且告诉webpack将代码保存到内存中；webpack-dev-middleware通过sockjs和webpack-dev-server/client建立webSocket长连接，将webpack打包阶段的各个状态告知浏览器端，最重要的是新模块的hash值。webpack-dev-server/client通过webpack/hot/dev-server中的HMR去请求新的更新模块，HMR主要借助JSONP。先拿到hash的json文件，然后根据hash拼接出更新的文件js，然后HotModulePlugin对比新旧模块和模块依赖完成更新。
+
+## Tree Shaking
+
+启动Tree Shaking功能必须同时满足以下3个条件：
+1.使用ESM规范编写模块代码
+2.配置optimization.usedExports为true,启动标记功能
+3.启动代码优化功能，可以通过如下方式实现：
+ *配置mode=production
+ *配置optimization.minimize=true
+ *提供optimization.minimizer数组
+
+Tree Shaking原理
 
 [webpack热更新原理](https://juejin.cn/post/7152845665477869582?searchId=202407171441107B631F6471FADB26ED99)
 [一文了解Webpack热更新(HMR)原理](https://juejin.cn/post/7300118821531942927?searchId=202407171419393CEE50881EE03D040614)
