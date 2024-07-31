@@ -7,7 +7,6 @@ categories:
  - javascript
 ---
 
-
 寄生组合继承
 
 通过构造函数继承属性
