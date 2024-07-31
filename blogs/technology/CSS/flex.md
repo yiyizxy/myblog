@@ -9,8 +9,8 @@ categories:
 
 ## 概念
 
-Flexbox（弹性盒子布局）是一种用于页面布局的 CSS3 新特性，它提供了更加灵活和高效的布局方式，特别适用于创建复杂的、响应式的布局结构。Flexbox 的主要思想是让容器的子元素能够根据需要自动伸缩，并且能够控制子元素在容器内的对齐、排列方式。
-![flex](./flex/css/image.png "flex")
+Flexbox（弹性盒子布局）是一种用于页面布局的 CSS3 新特性，它提供了更加灵活和高效的布局方式，特别适用于创建复杂的、响应式的布局结构。Flexbox的主要思想是让容器的子元素能够根据需要自动伸缩，并且能够控制子元素在容器内的对齐、排列方式。
+![flex](./assets/flex/flex.png "flex")
 
 容器默认存在两根轴: 水平的主轴（main axis）和垂直的交叉轴（cross axis）。主轴的开始位置（与边框的交叉点）叫做main start，结束位置叫做main end；交叉轴的开始位置叫做cross start，结束位置叫做cross end。
 
@@ -25,34 +25,34 @@ Flexbox（弹性盒子布局）是一种用于页面布局的 CSS3 新特性，�
  column         | 主轴为垂直方向（垂直布局），起点在上沿，从上往下排列         |
  column-reverse | 主轴为垂直方向（垂直布局），起点在下沿，从下往上排列         |
 
-![flex-direction](./assets/flex/flexDirection.png "flex-direction")
+![flex-direction](./assets/flex/flex-direction.png "flex-direction")
 
 ### flex-wrap
 
-| 属性值       | 含义               |
-|--------------|--------------------|
-| nowrap       | 默认值，表示不换行 |
-| wrap         | 换行               |
-| wrap-reverse | 换行，第一行在下方 |
+ 属性值       | 含义               |
+--------------|--------------------|
+ nowrap       | 默认值，表示不换行 |
+ wrap         | 换行               |
+ wrap-reverse | 换行，第一行在下方 |
 
-### nowrap
+#### nowrap
 
 默认值，不换行。当主轴的长度是固定并且空间不足时，项目尺寸会随之进行调整，而不会换行
-![no-wrap](./assets/flex/noWrap.png "no-wrap")
+![no-wrap](./assets/flex/no-wrap.png "no-wrap")
 
-### wrap
+#### wrap
 
 换行，第一行在上面
 ![wrap](./assets/flex/wrap.png "wrap")
 
-### wrap-reverse
+#### wrap-reverse
 
 换行，第一行在下方。
-![wrap-reverse](./assets/flex/wrapReverse.png "wrap-reverse")
+![wrap-reverse](./assets/flex/wrap-reverse.png "wrap-reverse")
 
 ### flex-flow
 
-即表示flex-direction flex-wrap，默认值为row nowrap
+即表示flex-direction flex-wrap，默认值为`row nowrap`
 
 ### justify-content
 
@@ -65,12 +65,9 @@ Flexbox（弹性盒子布局）是一种用于页面布局的 CSS3 新特性，�
  center        | 居中                                                                 |
  space-between | 两端对齐，项目之间的间隔都相等                                       |
  space-around  | 每个项目两侧的间隔相等。所以，项目之间的间隔比项目与边框的间隔大一倍 |
+ space-evenly  | 每个项目之间的间隔相等                                        |
 
-![justify-content](./assets/flex/justifyContent.png "justify-content")
-
-space-evenly flex 项都沿着主轴均匀分布在指定的对齐容器中。相邻 flex 项之间的间距，主轴起始位置到第一个 flex 项的间距，主轴结束位置到最后一个 flex 项的间距，都完全一样。
-
-![space-evenly](./assets//flex/spaceEvenly.png "space-evenly")
+![justify-content](./assets/flex/justify-content.png "justify-content")
 
 ### align-items
 
@@ -82,28 +79,49 @@ space-evenly flex 项都沿着主轴均匀分布在指定的对齐容器中。�
  flex-end   | 交叉轴的终点对齐                                              |
  center     | 交叉轴的中点对齐                                              |
  baseline   | 项目的第一行文字的基线对齐                                    |
- stretch    | （默认值） 如果项目未设置高度或设为auto，将占满整个容器的高度 |
- stretch    | 默认值，轴线占满整个交叉轴                                    |
+ stretch    |（默认值）如果项目未设置高度或设为auto，将占满整个容器的高度 |
 
-![align-items](./assets/flex/alignItems.png "align-items")
+![align-items](./assets/flex/align-items.png "align-items")
+![align-items-baseline](./assets/flex/align-items-baseline.png "align-items-baseline")
+![align-items-stretch](./assets/flex/align-items-stretch.png "align-items-stretch")
 
 ### align-content
 
 属性定义了多根轴线的对齐方式。如果项目只有一根轴线，该属性不起作用。
 
-| 属性值     | 含义                                                          |
-|------------|---------------------------------------------------------------|
-| flex-start | 交叉轴的起点对齐                                              |
-| flex-end   | 交叉轴的终点对齐                                              |
-| center     | 交叉轴的中点对齐                                              |
-| baseline   | 项目的第一行文字的基线对齐                                    |
-| stretch    | （默认值） 如果项目未设置高度或设为auto，将占满整个容器的高度 |
+ 属性值     | 含义                                                          |
+------------|---------------------------------------------------------------|
+ flex-start | 交叉轴的起点对齐                                              |
+ flex-end   | 交叉轴的终点对齐                                              |
+ center     | 交叉轴的中点对齐                                              |
+ baseline   | 项目的第一行文字的基线对齐                                    |
+ stretch    | （默认值） 如果项目未设置高度或设为auto，将占满整个容器的高度 |
+
+flex-start: 从交叉轴开始位置填充
+![align-content-flex-start](./assets/flex/align-content-flex-start.png "align-content-flex-start")
+
+flex-end: 从交叉轴结尾位置填充
+![align-content-flex-end](./assets/flex/align-content-flex-end.png "align-content-flex-end")
+
+center: 与交叉轴中点对齐
+![align-content-center](./assets/flex/align-content-center.png "align-content-center")
+
+space-between: 与交叉轴两端对齐，轴线之前的间隔平均分布
+![align-content-space-between](./assets/flex/align-content-space-between.png "align-content-space-between")
+
+space-around: 每根轴线两侧的间隔都相等。所以，轴线之间的间隔比轴线与边框的间隔大一倍
+![align-content-space-around](./assets/flex/align-content-space-around.png "align-content-space-around")
+
+stretch默认值，轴线占满整个交叉轴。这里我们先设置每个项目都是固定宽度，效果如下：
+![align-content-stretch](./assets/flex/align-content-stretch.png "align-content-stretch")
+下面就去掉每个项目的高度，它会占满整个交叉轴，效果如下:
+![align-content-stretch-height](./assets/flex/align-content-stretch-height.png "align-content-stretch-height")
 
 ## 项目属性
 
 ### order
 
-order属性用来定义项目的排列顺序。数值越小，排列越靠前，默认为 0 。使用形式如下:
+order属性用来定义项目的排列顺序。数值越小，排列越靠前，默认为0。使用形式如下:
 
 ```css
 .item {
@@ -115,7 +133,7 @@ order属性用来定义项目的排列顺序。数值越小，排列越靠前，
 
 ### flex-grow
 
-flex-grow属性定义项目的放大比例，默认为 0 ，即如果存在剩余空间，也不放大。
+flex-grow属性定义项目的放大比例，默认为0 ，即如果存在剩余空间，也不放大。
 
 ```css
 .item {
@@ -124,10 +142,10 @@ flex-grow属性定义项目的放大比例，默认为 0 ，即如果存在剩�
 ```
 
 如果所有项目的flex-grow属性都为 1，则它们将等分剩余空间（如果有的话）
-![flex-grow](./assets/flex/flexGrow1.png "flex-grow")
+![flex-grow](./assets/flex/flex-grow1.png "flex-grow")
 
 如果一个项目的flex-grow属性为2，其他项目都为1，则前者占据的剩余空间将比其他项多一倍。
-![flex-grow](./assets/flex/flexGrow2.png "flex-grow")
+![flex-grow](./assets/flex/flex-grow2.png "flex-grow")
 
 ### flex-shrink
 
@@ -140,10 +158,10 @@ flex-shrink属性定义了项目的缩小比例，默认为 1 ，即如果空间
 ```
 
 如果所有项目的flex-shrink属性都为 1，当空间不足时，都将等比例缩小。
-![flex-shrink](./assets/flex/flexShrink1.png "flex-shrink")
+![flex-shrink](./assets/flex/flex-shrink1.png "flex-shrink")
 
 如果一个项目的flex-shrink属性为 0，其他项目都为 1，则空间不足时，前者不缩小。
-![flex-shrink](./assets/flex/flexShrink0.png "flex-shrink")
+![flex-shrink](./assets/flex/flex-shrink0.png "flex-shrink")
 负值对该属性无效
 
 ### flex-basis
@@ -251,7 +269,7 @@ align-self属性允许单个项目有与其他项目不一样的对齐方式，�
 // flex-start: 元素与容器顶部对齐
 ```
 
-![align-self](./assets/flex/alignSelf.png "align-self")
+![align-self](./assets/flex/align-self.png "align-self")
 
 ## 参考
 

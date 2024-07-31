@@ -1,5 +1,5 @@
 ---
-title: less与sass的区别
+title: Less与Sass的区别
 date: 2024/07/01
 tags:
  - CSS
