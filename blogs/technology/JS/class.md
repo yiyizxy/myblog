@@ -12,6 +12,7 @@ categories:
 通过构造函数继承属性
 
 通过原型链继承方法
+
 ```js
 class Dog {
     constructor(name: string) {
