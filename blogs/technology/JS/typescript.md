@@ -21,9 +21,48 @@ Typescript是一个强类型的JavaScript超集，支持ES6语法，支持面向
 
 ## TypeScript中const和readonly的区别？枚举和常量枚举的区别？接口和类型别名的区别？
 
-const可以防止变量的值被修改，readonly可以防止变量的属性被修改。
-枚举和常量枚举: 常量枚举只能使用常量枚举表达式，并且不同于常规的枚举，它们在编译阶段会被删除。 常量枚举成员在使用的地方会被内联进来。 之所以可以这么做是因为，常量枚举不允许包含计算成员。
-接口和类型别名: 两者都可以用来描述对象或函数的类型。与接口不同，类型别名还可以用于其他类型，如基本类型（原始值）、联合类型、元组。
+const: 用于声明常量变量，块级作用域，值在初始化后不能修改
+readonly: 用于声明只读属性，通常在类和接口中使用，属性在初始化后不能修改。
+
+枚举: 定义一组命名常量，编译后生成相应的JavaScript代码
+常量枚举: 编译时被完全移除，只包含枚举成员的值，减少生成的JavaScript代码量。
+
+```js
+// 枚举
+enum Color {
+  Red,
+  Green,
+  Blue
+}
+
+const myColor: Color = Color.Green;
+console.log(myColor); // 输出: 1
+
+// 常量枚举
+const enum Color {
+  Red,
+  Green,
+  Blue
+}
+
+const myColor: Color = Color.Green;
+console.log(myColor); // 输出: 1
+```
+
+接口: 定义对象的结构、类型、方法等，可以被类实现或扩展。
+类型别名: 为任何类型创建一个新的名称，不能被实现或继承。
+
+```js
+interface Person {
+  name: string;
+  age: number;
+}
+
+type Person = {
+  name: string;
+  age: number;
+};
+```
 
 ## TypeScript中any类型的作用是什么？
 
@@ -76,12 +115,12 @@ interface Person {
 
 ## TypeScript中的this和JavaScript中的this有什么差异？
 
-TypeScript：noImplicitThis: true 的情况下，必须去声明 this 的类型，才能在函数或者对象中使用this。
-Typescript 中箭头函数的 this 和 ES6 中箭头函数中的 this 是一致的。
+Javascript: this的值取决于函数调用的方式
+TypeScript: 提供了类型检查和一些特定功能，增强了this的可读性和可靠性。允许显式声明this参数，控制this的类型
 
-## TypeScript中使用Union Types时有哪些注意事项？
+## TypeScript中使用Union Types[联合类型]时有哪些注意事项？
 
-属性或方法访问: 当 TypeScript 不确定一个联合类型的变量到底是哪个类型的时候，我们只能访问此联合类型的所有类型里共有的属性或方法。
+属性或方法访问: 当TypeScript不确定一个联合类型的变量到底是哪个类型的时候，我们只能访问此联合类型的所有类型里共有的属性或方法。
 
 ```js
 function getLength(something: string | number): number {
@@ -124,18 +163,75 @@ type strUnion =  keyof typeof str; // 'A' | 'B' | 'C'
 
 ## TypeScript中type和interface的区别?
 
-相同点：
+### 相同点
 
-1. 都可以描述'对象'或者'函数'
-2. 都允许拓展(extends)
+1.interface和type都可以用于定义对象类型
 
-不同点：
+```js
+interface Person {
+  name: string;
+  age: number;
+}
 
-1. type可以声明基本类型，联合类型，元组
-2. type可以使用 typeof 获取实例的类型进行赋值
-3. 多个相同的interface 声明可以自动合并
+type Person = {
+  name: string;
+  age: number;
+};
+```
 
-结论：使用interface描述‘数据结构’，使用type描述‘类型关系’
+2.interface使用extends关键字扩展，type使用交叉类型扩展
+
+```js
+interface Employee extends Person {
+  employeeId: number;
+}
+
+type Employee = Person & {
+  employeeId: number;
+};
+```
+
+### 不同点
+
+1.interface支持声明合并，type不支持
+
+```js
+interface Person {
+  name: string;
+}
+
+interface Person {
+  age: number;
+}
+```
+
+2.type可以定义联合类型、元组类型等复杂类型，interface主要用于定义对象类型
+
+```js
+type StringOrNumber = string | number;
+type Tuple = [string, number];
+```
+
+3.interface可以被类实现，type不能
+
+```js
+interface Person {
+  name: string;
+  age: number;
+}
+
+class Employee implements Person {
+  name: string;
+  age: number;
+  employeeId: number;
+
+  constructor(name: string, age: number, employeeId: number) {
+    this.name = name;
+    this.age = age;
+    this.employeeId = employeeId;
+  }
+}
+```
 
 ## TypeScript 中 ?.、??、!、!.、_、**等符号的含义？
 
@@ -196,7 +292,7 @@ printY = printX
 ## TypeScript中同名的interface或者同名的interface和class可以合并吗？
 
 - 同名的interface会自动合并,它们的成员会被合并到一个接口中。
-- 同名的interface和class 不能直接合并，但可以通过 interface 扩展 class 的静态部分来实现类似的效果
+- 同名的interface和class不能直接合并，但可以通过interface扩展class的静态部分来实现类似的效果
 
 ```js
 // 同名的interface会自动合并
