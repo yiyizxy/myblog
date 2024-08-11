@@ -315,7 +315,7 @@ function debounce(fn, wait) {
   let timer = null;
 
   return function() {
-    let context = this,
+    const context = this,
         args = arguments;
 
     // 如果此时存在定时器的话，则取消之前的定时器重新记时
@@ -352,6 +352,23 @@ function throttle(fn, delay) {
       return fn.apply(context, args);
     }
   };
+}
+```
+
+```js
+// 定时器实现方式
+function throttle (func, time) {
+    let timeout 
+    return function() {
+        const context = this
+        const args = arguments
+        if (!timeout) {
+            timeout = setTimeout(() => {
+                timeout = null
+                func.apply(context, arguments)
+            }, time)
+        }
+    }
 }
 ```
 
@@ -1009,65 +1026,46 @@ function sumBigNumber(a, b) {
 将两个数组的对应的位进行相加，两个数相加的结果可能大于10，所以可能要仅为，对10进行取余操作，将结果保存在当前位
 判断当前位是否大于9，也就是是否会进位，若是则将temp赋值为true，因为在加法运算中，true会自动隐式转化为1，以便于下一次相加
 重复上述操作，直至计算结束
-13. 实现 add(1)(2)(3)
-函数柯里化概念： 柯里化（Currying）是把接受多个参数的函数转变为接受一个单一参数的函数，并且返回接受余下的参数且返回结果的新函数的技术。
 
-1）粗暴版
+## 函数柯里化实现
 
-function add (a) {
-return function (b) {
- 	return function (c) {
-      return a + b + c;
- 	}
-}
-}
-console.log(add(1)(2)(3)); // 6
-2）柯里化解决方案
+函数柯里化概念：柯里化（Currying）是把接受多个参数的函数转变为接受一个单一参数的函数，并且返回接受余下的参数且返回结果的新函数的技术。
 
-参数长度固定
-var add = function (m) {
-  var temp = function (n) {
-    return add(m + n);
-  }
-  temp.toString = function () {
-    return m;
-  }
-  return temp;
-};
-console.log(add(3)(4)(5)); // 12
-console.log(add(3)(6)(9)(25)); // 43
-对于add(3)(4)(5)，其执行过程如下：
-
-先执行add(3)，此时m=3，并且返回temp函数；
-执行temp(4)，这个函数内执行add(m+n)，n是此次传进来的数值4，m值还是上一步中的3，所以add(m+n)=add(3+4)=add(7)，此时m=7，并且返回temp函数
-执行temp(5)，这个函数内执行add(m+n)，n是此次传进来的数值5，m值还是上一步中的7，所以add(m+n)=add(7+5)=add(12)，此时m=12，并且返回temp函数
-由于后面没有传入参数，等于返回的temp函数不被执行而是打印，了解JS的朋友都知道对象的toString是修改对象转换字符串的方法，因此代码中temp函数的toString函数return m值，而m值是最后一步执行函数时的值m=12，所以返回值是12。
-参数长度不固定
-function add (...args) {
-    //求和
-    return args.reduce((a, b) => a + b)
-}
-function currying (fn) {
-    let args = []
-    return function temp (...newArgs) {
-        if (newArgs.length) {
-            args = [
-                ...args,
-                ...newArgs
-            ]
-            return temp
+```js
+function curry(fn) {
+    return function curried (...args) {
+      // 如果传入的参数数量达到原函数的参数数量，则直接调用原函数
+        if (args.length >= fn.length) {
+            return fn.apply(this, args)
         } else {
-            let val = fn.apply(this, args)
-            args = [] //保证再次调用时清空
-            return val
+        // 否则返回一个新的函数，继续接收参数
+            return function (...moreArgs) {
+                return curried.apply(this, args.concat(moreArgs))
+            }
         }
     }
 }
-let addCurry = currying(add)
-console.log(addCurry(1)(2)(3)(4, 5)())  //15
-console.log(addCurry(1)(2)(3, 4, 5)())  //15
-console.log(addCurry(1)(2, 3, 4, 5)())  //15
-14. 实现类数组转化为数组
+```
+
+## 实现 add(1)(2)(3)
+
+```js
+function add (x, y, z) {
+  return x + y + z
+}
+
+// function add (...args) {
+//   return args.reduce((a, b) => a + b)
+// }
+
+const curriedAdd = curry(add)
+console.log(curriedAdd(1)(2)(3))
+```
+
+
+
+## 实现类数组转化为数组
+
 类数组转换为数组的方法有这样几种：
 
 通过 call 调用数组的 slice 方法来实现转换
@@ -1709,101 +1707,6 @@ function printMatrix(arr){
   }
   return res
 }
-标签：
-本文收录于以下专栏
-cover
-2021最新前端面试题汇总
-专栏目录
-总结最新的前端面试题，持续更新中，总超过25w字！
-1.1k 订阅
-·
-14 篇文章
-订阅
-上一篇
-「2021」高频前端面试题汇总之React篇（上）
-下一篇
-「2021」高频前端面试题汇总之代码输出结果篇
-评论 42
-avatar
-0 / 1000
-发送
-最热  最新
-call apply需要注意两点
-1.context设置需要考虑node环境以及传入的是number、string等基础数据类型的情况
-context =
-context === undefined || context === null ? globalThis : Object(context);
-2.挂载在context上的fn需要注意变量重名的情况，可使用symbol来创建挂载fn名称
-const symbol = Symbol("fn");
-context[symbol] = this;
-展开
-5月前
-点赞
-评论
-手写new
-后面判断函数返回值的时候（typeof result==='object'&&result!=='null'）||typeof result ===function
-要注意null的情况
-1年前
-点赞
-评论
-前端工程师
-13. 将数字每千分位用逗号隔开 这个是错的
-1年前
-2
-评论
-查看全部 42 条评论 
-关注
-已关注
-私信
-目录
-收起
-前端面试题系列文章：
-一、JavaScript 基础
-1. 手写 Object.create
-2. 手写 instanceof 方法
-3. 手写 new 操作符
-4. 手写 Promise
-5. 手写 Promise.then
-6. 手写 Promise.all
-7. 手写 Promise.race
-8. 手写防抖函数
-9. 手写节流函数
-10. 手写类型判断函数
-11. 手写 call 函数
-12. 手写 apply 函数
-13. 手写 bind 函数
-14. 函数柯里化的实现
-15. 实现AJAX请求
-16. 使用Promise封装AJAX请求
-17. 实现浅拷贝
-（1）Object.assign()
-（2）扩展运算符
-（3）数组方法实现数组浅拷贝
-（4）手写实现浅拷贝
-18. 实现深拷贝
-（1）JSON.stringify()
-（2）函数库lodash的_.cloneDeep方法
-（3）手写实现深拷贝函数
-二、数据处理
-1. 实现日期格式化函数
-2. 交换a,b的值，不能用临时变量
-3. 实现数组的乱序输出
-4. 实现数组元素求和
-5. 实现数组的扁平化
-6. 实现数组去重
-7. 实现数组的flat方法
-8. 实现数组的push方法
-9. 实现数组的filter方法
-10. 实现数组的map方法
-11. 实现字符串的repeat方法
-12. 实现字符串翻转
-13. 将数字每千分位用逗号隔开
-14. 实现非负大整数相加
-13. 实现 add(1)(2)(3)
-14. 实现类数组转化为数组
-15. 使用 reduce 求和
-16. 将js对象转化为树形结构
-17. 使用ES5和ES6求函数参数的和
-18. 解析 URL Params 为对象
 三、场景应用
 1. 循环打印红黄绿
 （1）用 callback 实现

@@ -54,11 +54,13 @@ open-app-gestalt重构思想：不同的系统支持不同的唤起方式，由�
 业务层面：
 
 #### 展示侧
+
 技术层面：如果有SEO的需求技术栈考虑SSR，无则对性能要求比较高的情况下建议SSR
 
 服务库平台是用的什么？
 
 #### seeddesign项目学习
+
 1. demo页支持react、vue查看，页面结构包括组件列表页、组件详情页，其中组件列表页包括顶部title+logo、原子层组件目录、分子层组件，组件详情页包括：组件名称+返回按钮、组件demo ui,技术栈包括react@16.8.1、react-router-dom@5.0.1、webpack@3.12.0，hashRouter，
 目录包括：
 webpack的配置包括：entry、output、module、pulgins、devServer、externals

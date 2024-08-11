@@ -7,14 +7,20 @@ categories:
  - 框架
 ---
 
-## React Router
+## React-Router是什么？
 
-### history和hash路由区别？
+可以实现无刷新页面的情况下显示不同的页面
+react-router: 实现了路由的核心功能
+react-router-dom: 基于react-router，加入了在浏览器运行环境下的一些功能
+react-router-native: 基于react-router，加入了react-native运行环境下的一些功能
+react-router-config: 用于配置静态路由的工具库
+
+## history和hash路由区别？
 
 hash路由url上会携带#不美观,不支持SSR
 history路由需要后端配合改（ningix）,支持SSR
 
-### V6和V5的区别
+## V6和V5的区别
 
 1.`<Route>`路径的变化
 
@@ -105,7 +111,9 @@ navigate('/index2', {replace: true})
 6.重定向`<Redirect/>`删除，新增`<Navigate/>`
 
 ```js
+// defore
 <Redirect to='index1' />
+// after
 <Navigate to='index1' />
 ```
 
@@ -140,7 +148,7 @@ function RenderRoutes() {
 }
 ```
 
-### React-Router-Dom V6
+## React-Router-Dom V6
 
 react-router提供一些核心api,如Router、Route，不提供和Dom相关的api
 react-router-dom提供BrowserRouter、HashRouter、Link这些，可以通过dom操作触发事件，控制路由
