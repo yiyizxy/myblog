@@ -728,9 +728,10 @@ function deepCopy(object) {
   return newObject;
 }
 二、数据处理
-1. 实现日期格式化函数
-输入：
+## 实现日期格式化函数
 
+```js
+// 输入：
 dateFormat(new Date('2020-12-01'), 'yyyy/MM/dd') // 2020/12/01
 dateFormat(new Date('2020-04-01'), 'yyyy/MM/dd') // 2020/04/01
 dateFormat(new Date('2020-04-01'), 'yyyy年MM月dd日') // 2020年04月01日
@@ -743,11 +744,17 @@ const dateFormat = (dateInput, format)=>{
     format = format.replace(/dd/,day)
     return format
 }
-2. 交换a,b的值，不能用临时变量
-巧妙的利用两个数的和、差：
+```
+
+## 交换a,b的值，不能用临时变量
+
+```js
+// 巧妙的利用两个数的和、差：
 a = a + b
 b = a - b
 a = a - b
+```
+
 3. 实现数组的乱序输出
 主要的实现思路就是：
 取出数组的第一个元素，随机产生一个索引值，将该第一个元素和这个索引对应的元素进行交换。
@@ -772,24 +779,29 @@ let length = arr.length,
     arr[randomIndex] = temp;
   }
 console.log(arr)
-4. 实现数组元素求和
-arr=[1,2,3,4,5,6,7,8,9,10]，求和
+
+## 实现数组元素求和
+
+```js
+// arr=[1,2,3,4,5,6,7,8,9,10]，求和
 let arr=[1,2,3,4,5,6,7,8,9,10]
 let sum = arr.reduce( (total,i) => total += i,0);
 console.log(sum);
-arr=[1,2,3,[[4,5],6],7,8,9]，求和
+
+// arr=[1,2,3,[[4,5],6],7,8,9]，求和
 var = arr=[1,2,3,[[4,5],6],7,8,9]
-let arr= arr.toString().split(',').reduce( (total,i) => total += Number(i),0);
+let arr= arr.toString().split(',').reduce((total,i) => total += Number(i),0);
 console.log(arr);
-递归实现：
 
+// 递归实现：
 let arr = [1, 2, 3, 4, 5, 6] 
-
 function add(arr) {
     if (arr.length == 1) return arr[0] 
     return arr[0] + add(arr.slice(1)) 
 }
 console.log(add(arr)) // 21
+```
+
 5. 实现数组的扁平化
 （1）递归实现
 
