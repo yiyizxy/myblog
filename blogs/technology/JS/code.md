@@ -864,18 +864,15 @@ function flatten(arr) {
   return JSON.parse(str); 
 }
 console.log(flatten(arr)); //  [1, 2, 3, 4，5]
-6. 实现数组去重
+## 实现数组去重
+
+```js
 给定某无序数组，要求去除数组中的重复数字并且返回新的无重复数组。
-
 ES6方法（使用数据结构集合）：
-
 const array = [1, 2, 3, 5, 1, 5, 9, 1, 2, 8];
-
 Array.from(new Set(array)); // [1, 2, 3, 5, 9, 8]
 ES5方法：使用map存储不重复的数字
-
 const array = [1, 2, 3, 5, 1, 5, 9, 1, 2, 8];
-
 uniqueArray(array); // [1, 2, 3, 5, 9, 8]
 
 function uniqueArray(array) {
@@ -889,28 +886,40 @@ function uniqueArray(array) {
   }
   return res;
 }
-7. 实现数组的flat方法
+```
+
+## 实现数组的flat方法
+
+```js
 function _flat(arr, depth) {
   if(!Array.isArray(arr) || depth <= 0) {
-    return arr;
+    return arr
   }
   return arr.reduce((prev, cur) => {
     if (Array.isArray(cur)) {
       return prev.concat(_flat(cur, depth - 1))
     } else {
-      return prev.concat(cur);
+      return prev.concat(cur)
     }
-  }, []);
+  }, [])
 }
-8. 实现数组的push方法
-let arr = [];
+```
+
+## 实现数组的push方法
+
+```js
+let arr = []
 Array.prototype.push = function() {
-	for( let i = 0 ; i < arguments.length ; i++){
-		this[this.length] = arguments[i] ;
-	}
-	return this.length;
+  for( let i = 0; i < arguments.length; i++){
+    this[this.length] = arguments[i]
+  }
+  return this.length
 }
-9. 实现数组的filter方法
+```
+
+## 实现数组的filter方法
+
+```js
 Array.prototype._filter = function(fn) {
     if (typeof fn !== "function") {
         throw Error('参数必须是一个函数');
@@ -921,7 +930,11 @@ Array.prototype._filter = function(fn) {
     }
     return res;
 }
-10. 实现数组的map方法
+```
+
+## 实现数组的map方法
+
+```js
 Array.prototype._map = function(fn) {
    if (typeof fn !== "function") {
         throw Error('参数必须是一个函数');
@@ -932,31 +945,143 @@ Array.prototype._map = function(fn) {
     }
     return res;
 }
-11. 实现字符串的repeat方法
-输入字符串s，以及其重复的次数，输出重复的结果，例如输入abc，2，输出abcabc。
+```
 
+## 实现字符串的repeat方法
+
+```js
+// 输入字符串s，以及其重复的次数，输出重复的结果，例如输入abc，2，输出abcabc。
 function repeat(s, n) {
     return (new Array(n + 1)).join(s);
 }
-递归：
 
+// 递归：
 function repeat(s, n) {
     return (n > 0) ? s.concat(repeat(s, --n)) : "";
 }
-12. 实现字符串翻转
-在字符串的原型链上添加一个方法，实现字符串翻转：
+```
 
+## 实现字符串翻转
+
+```js
+// 在字符串的原型链上添加一个方法，实现字符串翻转：
 String.prototype._reverse = function(a){
     return a.split("").reverse().join("");
 }
 var obj = new String();
 var res = obj._reverse ('hello');
 console.log(res);    // olleh
-需要注意的是，必须通过实例化对象之后再去调用定义的方法，不然找不到该方法。
+// 需要注意的是，必须通过实例化对象之后再去调用定义的方法，不然找不到该方法。
+```
 
-13. 将数字每千分位用逗号隔开
-数字有小数版本：
+## 正则写13-15位大写字母或数字
 
+```js
+const pattern = /^[A-Z0-9]{13,15}$/
+```
+
+## 将一个对象数组转换为树形结构
+
+```js
+// 输入
+const data = [
+  { id: 1, parentId: null, name: 'Root' },
+  { id: 2, parentId: 1, name: 'Child 1' },
+  { id: 3, parentId: 1, name: 'Child 2' },
+  { id: 4, parentId: 2, name: 'Child 1.1' },
+  { id: 5, parentId: 2, name: 'Child 1.2' },
+  { id: 6, parentId: 3, name: 'Child 2.1' },
+]
+
+// 输出
+
+const data1 = [
+  {
+    "id": 1,
+    "parentId": null,
+    "name": "Root",
+    "children": [
+      {
+        "id": 2,
+        "parentId": 1,
+        "name": "Child 1",
+        "children": [
+          {
+            "id": 4,
+            "parentId": 2,
+            "name": "Child 1.1",
+            "children": []
+          },
+          {
+            "id": 5,
+            "parentId": 2,
+            "name": "Child 1.2",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "parentId": 1,
+        "name": "Child 2",
+        "children": [
+          {
+            "id": 6,
+            "parentId": 3,
+            "name": "Child 2.1",
+            "children": []
+          }
+        ]
+      }
+    ]
+  }
+]
+
+
+
+function arrayToTree(items) {
+  const rootItems = [];
+  const lookup = {};
+
+  // 初始化 lookup 表
+  for (const item of items) {
+    const itemId = item.id;
+    const parentId = item.parentId;
+
+    // 确保 lookup 表中有当前项
+    if (!lookup[itemId]) {
+      lookup[itemId] = { ...item, children: [] };
+    } else {
+      lookup[itemId] = { ...lookup[itemId], ...item };
+    }
+
+    const TreeItem = lookup[itemId];
+
+    // 处理根项
+    if (parentId === null) {
+      rootItems.push(TreeItem);
+    } else {
+      // 确保 lookup 表中有父项
+      if (!lookup[parentId]) {
+        lookup[parentId] = { children: [] };
+      }
+
+      // 将当前项添加到父项的 children 数组中
+      lookup[parentId].children.push(TreeItem);
+    }
+  }
+
+  return rootItems;
+}
+
+const treeData = arrayToTree(data);
+console.log(JSON.stringify(treeData, null, 2));
+```
+
+## 将数字每千分位用逗号隔开
+
+```js
+// 数字有小数版本：
 let format = n => {
     let num = n.toString() // 转成字符串
     let decimals = ''
@@ -977,7 +1102,8 @@ let format = n => {
     }
 }
 format(12323.33)  // '12,323.33'
-数字无小数版本：
+
+// 数字无小数版本：
 
 let format = n => {
     let num = n.toString() 
@@ -994,7 +1120,9 @@ let format = n => {
     }
 }
 format(1232323)  // '1,232,323'
-14. 实现非负大整数相加
+```
+
+## 实现非负大整数相加
 JavaScript对数值有范围的限制，限制如下：
 
 Number.MAX_VALUE // 1.7976931348623157e+308
