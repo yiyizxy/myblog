@@ -22,6 +22,47 @@ categories:
 
 ## 唤起
 
+### open-app-manager
+
+#### 实现思路
+
+1. 唤起配置化参数配置：渠道来源(mSource)、页面标识()、唤起模块(launchKey)、唤起地址、唤起策略、自定义唤起策略、是否支持口令等
+2. 先获取配置平台的唤起配置相关参数，为了防止网络异常，接口有做重试优化
+3. 根据配置的唤起模块使用```document.querySelectorAll(`[data-launch-name=${launchPoint.launchKey}]`)```收集页面上的唤起点，这里需要区分是否列表型节点，如是
+4. 判断节点是否初始化过inited
+
+
+
+问题
+
+1. 列表型唤起点如何解决？首先需要接入方在dom节点上表明这是个列表型唤起节点
+2. 动态节点如何解决绑定问题?使用js的MutationObserver的API观测DOM节点动态变化,防抖操作
+
+```js
+handleDynamicDOM() {
+    // TODO MutationObserver 能力检测 不支持的polyfill
+    const observer = new MutationObserver(debounce(mutationsList => {
+        if (mutationsList?.length) {
+            this.config() // 绑定唤起实例
+            if (this.isRequestError) {
+                handleGetDataError()
+            }
+        }
+    }, 500))
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+}
+```
+
+
+
+列表型唤起点
+![唤起配置化接口](./assets/resume/open-app-manager-ajax.png "唤起配置化接口")
+![收集唤起点](./assets/resume/launchkey.png "收集唤起点")
+
+
 open-app-gestalt重构思想：不同的系统支持不同的唤起方式，由原来的if-else通过策略模式改造
 
 ## UGC
