@@ -51,17 +51,123 @@ webpack-dev-middleware扮演是中间件的角色，一头可以调用webpack暴
 面试题：说一下webpack的热更新原理？
 webpack通过watch可以监测代码的变化；webpack-dev-middleware可以调用webpack暴露的API检测代码变化，并且告诉webpack将代码保存到内存中；webpack-dev-middleware通过sockjs和webpack-dev-server/client建立webSocket长连接，将webpack打包阶段的各个状态告知浏览器端，最重要的是新模块的hash值。webpack-dev-server/client通过webpack/hot/dev-server中的HMR去请求新的更新模块，HMR主要借助JSONP。先拿到hash的json文件，然后根据hash拼接出更新的文件js，然后HotModulePlugin对比新旧模块和模块依赖完成更新。
 
+## webpack的Hash类型
+
+### [hash]
+
+描述：整个项目构建的哈希值，每次构建时生成一个新的哈希值。
+适用场景：适用于整个项目构建的全局哈希，通常用于非代码资源（如 CSS、图像等）。
+
+### [chunkhash]
+
+描述：基于每个入口文件及其依赖的哈希值，不同的入口文件会生成不同的哈希值。
+适用场景：适用于代码分割后的文件，确保只有内容变化的文件会生成新的哈希值，从而更好地利用缓存。
+
+### [contenhash]
+
+描述：基于文件内容的哈希值，文件内容不变则哈希值不变。
+适用场景：适用于静态资源文件（如 CSS、图片等），确保文件内容不变时哈希值也不变，从而更好地利用缓存。
+
 ## Tree Shaking
+
+配置mode=production默认支持tree shaking，并且package.json设置sideEffects，设置的文件表明不支持tree shaking
 
 启动Tree Shaking功能必须同时满足以下3个条件：
 1.使用ESM规范编写模块代码
 2.配置optimization.usedExports为true,启动标记功能
 3.启动代码优化功能，可以通过如下方式实现：
- *配置mode=production
  *配置optimization.minimize=true
  *提供optimization.minimizer数组
 
-Tree Shaking原理
+```js
+// webpack.config.js
+const path = require('path');
+const TerserPlugin = require('terser-webpack-plugin');
+
+module.exports = {
+  mode: 'production',
+  entry: './src/index.js',
+  output: {
+    filename: 'bundle.js',
+    path: path.resolve(__dirname, 'dist')
+  },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env', {
+                "modules": false // 确保Babel不会将ES6模块语法转换为CommonJS模块
+            }]
+          }
+        }
+      }
+    ]
+  },
+  optimization: {
+    usedExports: true, // 这行是可选的，生产模式下默认启用
+    minimize: true,
+    minimizer: [new TerserPlugin({
+      terserOptions: {
+        compress: {
+          dead_code: true,
+          drop_console: true
+        }
+      }
+    })]
+  }
+};
+
+```
+
+## Tree Shaking原理
+
+## vendor && common文件代表什么
+
+vendor文件通常是指第三方库和依赖项，例如React、Lodash、Moment.js等。这些库通常不会频繁变化，因此将它们打包到一个单独的文件中可以利用浏览器缓存，从而减少加载时间
+common文件通常是指项目中多个入口点之间共享的代码。这些代码可能是业务逻辑、工具函数等。将这些共享代码提取到一个单独的文件中，可以避免重复加载，提高代码复用性和加载效率
+
+```js
+const path = require('path');
+
+module.exports = {
+  mode: 'production',
+  entry: {
+    main: './src/index.js'
+  },
+  output: {
+    filename: '[name].[contenthash].js',
+    path: path.resolve(__dirname, 'dist')
+  },
+  optimization: {
+    splitChunks: { // 配置代码拆分
+      chunks: 'all', // 对所有类型的代码块进行拆分
+      cacheGroups: { // 定义缓存值
+        vendor: { // 将所有来自node_modules下的模块打包到vendors文件
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors', // vendors.[contenthash].js
+          chunks: 'all'
+        },
+        common: { // 将所有来自common下的模块打包到vendors文件
+          test: /[\\/]src[\\/]common[\\/]/,
+          name: 'common', // common.[contenthash].js 
+          chunks: 'all', 
+          minSize: 0 // 可以根据需要调整
+        }
+      }
+    }
+  }
+}
+```
+
+## source-map有哪些值
+
+
+
+## 参考
 
 [webpack热更新原理](https://juejin.cn/post/7152845665477869582?searchId=202407171441107B631F6471FADB26ED99)
 [一文了解Webpack热更新(HMR)原理](https://juejin.cn/post/7300118821531942927?searchId=202407171419393CEE50881EE03D040614)

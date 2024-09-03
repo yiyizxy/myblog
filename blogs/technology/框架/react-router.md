@@ -10,8 +10,8 @@ categories:
 ## React-Router是什么？
 
 可以实现无刷新页面的情况下显示不同的页面
-react-router: 实现了路由的核心功能
-react-router-dom: 基于react-router，加入了在浏览器运行环境下的一些功能
+react-router: 实现了路由的核心功能,提供一些核心api,如Router、Route，不提供和Dom相关的api
+react-router-dom: 基于react-router，提供浏览器运行环境所需的特定组件,`<BrowserRouter>`、`<HashRouter>`、`<Route>`、`<Routes>`这些
 react-router-native: 基于react-router，加入了react-native运行环境下的一些功能
 react-router-config: 用于配置静态路由的工具库
 
@@ -148,9 +148,6 @@ function RenderRoutes() {
 }
 ```
 
-## React-Router-Dom V6
-
-react-router提供一些核心api,如Router、Route，不提供和Dom相关的api
-react-router-dom提供BrowserRouter、HashRouter、Link这些，可以通过dom操作触发事件，控制路由
+## 参考
 
 [react-router v6](https://juejin.cn/post/7052933770260938783)

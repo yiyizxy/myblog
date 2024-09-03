@@ -27,7 +27,9 @@ b.x = 2
 console.log(a, b) // 输出{x: 2} {x: 2}
 ```
 
-## 浅拷贝例子
+## 浅拷贝
+
+浅拷贝是指一个新的对象对原始对象的属性值进行精确地拷贝，如果拷贝的是基本数据类型，拷贝的就是基本数据类型的值，如果是引用数据类型，拷贝的就是内存地址。如果其中一个对象的引用内存地址发生改变，另一个对象也会发生变化。
 
 ### Object.create(x)
 
@@ -41,7 +43,7 @@ a.name = '大黑子'
 console.log(b.name) // 大黑子
 ```
 
-### Object.assign({}, x)
+### Object.assign({}, x, ...)
 
 ```js
 let a = {
@@ -85,9 +87,11 @@ console.log(newArr) // [ 1, 2, 3, { a: 1 } ]
 
 ## 深拷贝
 
+深拷贝相对浅拷贝而言，如果遇到属性值为引用类型的时候，它新建一个引用类型并将对应的值复制给它，因此对象获得的一个新的引用类型而不是一个原有类型的引用。
+
 ### JSON.stringify
 
-**拷贝的对象的值中如果有函数、undefined、symbol 这几种类型，经过 JSON.stringify 序列化之后的字符串中这个键值对会消失；**
+**拷贝的对象的值中如果有函数、undefined、symbol 这几种类型，经过JSON.stringify序列化之后的字符串中这个键值对会消失；**
 **拷贝Date引用类型会变成字符串；**
 **无法拷贝不可枚举的属性；**
 **无法拷贝对象的原型链；**
@@ -113,15 +117,28 @@ let obj = {
 console.log(JSON.stringify(obj)); // {"name":"小黑子","age":18,"hobby":{"type":"coding"},"b":null,"d":{"n":100}}
 ```
 
+### 函数库lodash的_.cloneDeep方法
+
+```js
+const _ = require('lodash')
+const obj1 = {
+    a: 1,
+    b: { f: { g: 1 } },
+    c: [1, 2, 3]
+}
+const obj2 = _.cloneDeep(obj1)
+console.log(obj1.b.f === obj2.b.f) // false
+```
+
 ## 浅拷贝实现
 
 ```js
 function shalldowClone(target){
     // 只拷贝引用类型
-    if(typeof target !== 'object' || target == null) return target
+    if(!target || typeof target !== 'object') return target
     let targetCopy = Array.isArray(target) ? [] : {}
     for(let key in target){
-        // 不要隐式
+        // 不要隐式,hasOwnProperty返回true则代表属性在实例上
         if(target.hasOwnProperty(key)){
             // objCopy.key是个字符串,[]可以当成变量
             targetCopy[key] = target[key]
@@ -135,20 +152,20 @@ function shalldowClone(target){
 
 ```js
 function deepClone(obj){
-    if(typeof target !== 'object' || target == null) return target
+    if(target == null || typeof target !== 'object') return target
     let targetCopy = Array.isArray(target) ? [] : {}
     for(let key in target){
         // 不要隐式
         if(target.hasOwnProperty(key)){
             // objCopy.key是个字符串,[]可以当成变量
-            targetCopy[key] = deepClone(target[key])
+            targetCopy[key] = typeof target[key] === 'object' ? deepClone(target[key]) : target[key]
         }
     }
     return targetCopy
 }
 ```
 
-循环引用
+针对存在循环引用情况：
 
 ```js
 const target = {
@@ -159,7 +176,7 @@ const target = {
     },
     field4: [2, 4, 8]
 };
-target.target = target;
+target.target = target
 ```
 
 可以看到下面的结果：
@@ -172,6 +189,11 @@ target.target = target;
 有 - 直接返回
 没有 - 将当前对象作为key，克隆对象作为value进行存储
 继续克隆
+
+**先了解下如何判断对象是否存在循环引用？**
+
+```js
+```
 
 ```js
 function deepClone(target, map = new Map()) {

@@ -163,16 +163,17 @@ xhr.responseType = 'json';
 xhr.onreadyStateChange = function () {
   if (xhr.readyState === 4) {
     if (xhr.status === 200) {
-      console.log()xhr.responseText
+		console.log()xhr.responseText
     } else {
        console.error('Request failed with status: ' + xhr.status);
-            // 这里可以处理请求失败的情况
+    // 这里可以处理请求失败的情况
+	}
   }
 }
 // 发送请求，使用send方法发送请求。可以传递数据给服务器，如果不需要发送数据则传递null。
  xhr.send(null);
 // 取消请求（可选）
-如果需要取消已经发出的请求，可以使用abort方法。
+// 如果需要取消已经发出的请求，可以使用abort方法。
  
  // 超时
  xhr.timeout = 1000;
