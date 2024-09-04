@@ -45,265 +45,257 @@ function myInstanceof(left, right) {
 }
 ```
 
-## 手写new操作符
+## new操作符的实现步骤
 
-在调用new的过程中会发生以上四件事情：
-（1）首先创建了一个新的空对象
-（2）设置原型，将对象的原型设置为函数的prototype对象。
-（3）让函数的this指向这个对象，执行构造函数的代码（为这个新对象添加属性）
-（4）判断函数的返回值类型，如果是值类型，返回创建的对象。如果是引用类型，就返回这个引用类型的对象。
+1. 创建一个对象
+2. 将对象与构造函数通过原型链连接起来(也就是将对象的__proto__属性指向构造函数的prototype属性)
+3. 构造函数的this绑定到新的对象上(也就是为这个对象添加属性和方法)
+4. 返回新的对象(如果返回类型为原始值，则忽略，如果是对象，则正常处理)
 
 ```js
-function objectFactory() {
-  let newObject = null;
-  let constructor = Array.prototype.shift.call(arguments);
-  let result = null;
-  // 判断参数是否是一个函数
-  if (typeof constructor !== "function") {
-    console.error("type error");
-    return;
-  }
-  // 新建一个空对象，对象的原型为构造函数的 prototype 对象
-  newObject = Object.create(constructor.prototype);
-  // 将 this 指向新建对象，并执行函数
-  result = constructor.apply(newObject, arguments);
-  // 判断返回对象
-  let flag = result && (typeof result === "object" || typeof result === "function");
-  // 判断返回结果
-  return flag ? result : newObject;
+// 如果构造函数返回一个原始值，这个返回值无任何作用
+function Test(name) {
+    this.name = name
+    return 1
 }
-// 使用方法
-objectFactory(构造函数, 初始化参数);
+
+const t = new Test('xxx')
+console.log(t.name) // 'xxx'
+
+// 如果构造函数返回一个对象，则返回值会被正常使用
+function Test(name) {
+    this.name = name
+    console.log(this) // Test {name: 'xxx'}
+    return {
+        age: 26
+    }
+}
+const t = new Test('xxx')
+console.log(t) // {age: 26}
+console.log(t.name) // 'undefined'
+```
+
+```js
+// 手撕new操作符
+function myNew(constructor, ...args) {
+    // 1.创建一个新的空对象 
+    const obj = {}
+    // 2.将这个新对象的内部原型链接到构造函数的prototype对象  
+    obj.__proto__ = constructor.prototype
+    // 3.将这个新对象作为this上下文，并调用构造函数  
+    let result = constructor.apply(obj, args)
+    // 4.如果构造函数返回的是一个对象，则返回这个对象；否则返回新创建的对象
+    return result instanceOf Object ? result : obj
+}
 ```
 
 ## 手写Promise
 
-```js
-const PENDING = "pending";
-const RESOLVED = "resolved";
-const REJECTED = "rejected";
-
-function MyPromise(fn) {
-  // 保存初始化状态
-  var self = this;
-
-  // 初始化状态
-  this.state = PENDING;
-
-  // 用于保存 resolve 或者 rejected 传入的值
-  this.value = null;
-
-  // 用于保存 resolve 的回调函数
-  this.resolvedCallbacks = [];
-
-  // 用于保存 reject 的回调函数
-  this.rejectedCallbacks = [];
-
-  // 状态转变为 resolved 方法
-  function resolve(value) {
-    // 判断传入元素是否为 Promise 值，如果是，则状态改变必须等待前一个状态改变后再进行改变
-    if (value instanceof MyPromise) {
-      return value.then(resolve, reject);
-    }
-
-    // 保证代码的执行顺序为本轮事件循环的末尾
-    setTimeout(() => {
-      // 只有状态为 pending 时才能转变，
-      if (self.state === PENDING) {
-        // 修改状态
-        self.state = RESOLVED;
-
-        // 设置传入的值
-        self.value = value;
-
-        // 执行回调函数
-        self.resolvedCallbacks.forEach(callback => {
-          callback(value);
-        });
-      }
-    }, 0);
-  }
-
-  // 状态转变为 rejected 方法
-  function reject(value) {
-    // 保证代码的执行顺序为本轮事件循环的末尾
-    setTimeout(() => {
-      // 只有状态为 pending 时才能转变
-      if (self.state === PENDING) {
-        // 修改状态
-        self.state = REJECTED;
-
-        // 设置传入的值
-        self.value = value;
-
-        // 执行回调函数
-        self.rejectedCallbacks.forEach(callback => {
-          callback(value);
-        });
-      }
-    }, 0);
-  }
-
-  // 将两个方法传入函数执行
-  try {
-    fn(resolve, reject);
-  } catch (e) {
-    // 遇到错误时，捕获错误，执行 reject 函数
-    reject(e);
-  }
-}
-
-MyPromise.prototype.then = function(onResolved, onRejected) {
-  // 首先判断两个参数是否为函数类型，因为这两个参数是可选参数
-  onResolved =
-    typeof onResolved === "function"
-      ? onResolved
-      : function(value) {
-          return value;
-        };
-
-  onRejected =
-    typeof onRejected === "function"
-      ? onRejected
-      : function(error) {
-          throw error;
-        };
-
-  // 如果是等待状态，则将函数加入对应列表中
-  if (this.state === PENDING) {
-    this.resolvedCallbacks.push(onResolved);
-    this.rejectedCallbacks.push(onRejected);
-  }
-
-  // 如果状态已经凝固，则直接执行对应状态的函数
-
-  if (this.state === RESOLVED) {
-    onResolved(this.value);
-  }
-
-  if (this.state === REJECTED) {
-    onRejected(this.value);
-  }
-}
-```
-
-## 手写 Promise.then
-
-then 方法返回一个新的 promise 实例，为了在 promise 状态发生变化时（resolve / reject 被调用时）再执行 then 里的函数，我们使用一个 callbacks 数组先把传给then的函数暂存起来，等状态改变时再调用。
-
-那么，怎么保证后一个 **then** 里的方法在前一个 **then**（可能是异步）结束之后再执行呢？ 我们可以将传给 then 的函数和新 promise 的 resolve 一起 push 到前一个 promise 的 callbacks 数组中，达到承前启后的效果：
-
-承前：当前一个 promise 完成后，调用其 resolve 变更状态，在这个 resolve 里会依次调用 callbacks 里的回调，这样就执行了 then 里的方法了
-启后：上一步中，当 then 里的方法执行完成后，返回一个结果，如果这个结果是个简单的值，就直接调用新 promise 的 resolve，让其状态变更，这又会依次调用新 promise 的 callbacks 数组里的方法，循环往复。。如果返回的结果是个 promise，则需要等它完成之后再触发新 promise 的 resolve，所以可以在其结果的 then 里调用新 promise 的 resolve
-```js
-then(onFulfilled, onReject){
-    // 保存前一个promise的this
-    const self = this; 
-    return new MyPromise((resolve, reject) => {
-      // 封装前一个promise成功时执行的函数
-      let fulfilled = () => {
-        try{
-          const result = onFulfilled(self.value); // 承前
-          return result instanceof MyPromise? result.then(resolve, reject) : resolve(result); //启后
-        }catch(err){
-          reject(err)
-        }
-      }
-      // 封装前一个promise失败时执行的函数
-      let rejected = () => {
-        try{
-          const result = onReject(self.reason);
-          return result instanceof MyPromise? result.then(resolve, reject) : reject(result);
-        }catch(err){
-          reject(err)
-        }
-      }
-      switch(self.status){
-        case PENDING: 
-          self.onFulfilledCallbacks.push(fulfilled);
-          self.onRejectedCallbacks.push(rejected);
-          break;
-        case FULFILLED:
-          fulfilled();
-          break;
-        case REJECT:
-          rejected();
-          break;
-      }
-    })
-   }
-```
-
-注意：
-连续多个 then 里的回调方法是同步注册的，但注册到了不同的 callbacks 数组中，因为每次 then 都返回新的 promise 实例（参考上面的例子和图）
-注册完成后开始执行构造函数中的异步事件，异步完成之后依次调用 callbacks 数组中提前注册的回调
-
-## 手写 Promise.all
-
-1) 核心思路
-接收一个 Promise 实例的数组或具有 Iterator 接口的对象作为参数
-这个方法返回一个新的 promise 对象，
-遍历传入的参数，用Promise.resolve()将参数"包一层"，使其变成一个promise对象
-参数所有回调成功才是成功，返回值数组与参数顺序一致
-参数数组其中一个失败，则触发失败状态，第一个触发失败的 Promise 错误信息作为 Promise.all 的错误信息。
-2）实现代码
-
-一般来说，Promise.all 用来处理多个并发请求，也是为了页面数据构造的方便，将一个页面所用到的在不同接口的数据一起请求过来，不过，如果其中一个接口失败了，多个请求也就失败了，页面可能啥也出不来，这就看当前页面的耦合程度了
+三种状态： pending(进行中)、fulfilled(已成功)、rejected(已失败)
+状态改变：PENDING -> FULFILLED、PENDING -> REJECTED
+[一篇文章带你手写Promise以及all和race](https://juejin.cn/post/7338645700098490419?searchId=20240904113125B0E75B03417527EE1124)
 
 ```js
-function promiseAll(promises) {
-  return new Promise(function(resolve, reject) {
-    if(!Array.isArray(promises)){
-        throw new TypeError(`argument must be a array`)
-    }
-    var resolvedCounter = 0;
-    var promiseNum = promises.length;
-    var resolvedResult = [];
-    for (let i = 0; i < promiseNum; i++) {
-      Promise.resolve(promises[i]).then(value=>{
-        resolvedCounter++;
-        resolvedResult[i] = value;
-        if (resolvedCounter == promiseNum) {
-            return resolve(resolvedResult)
-          }
-      },error=>{
-        return reject(error)
-      })
-    }
+// promise使用
+const promise = new Promise((resove, reject) => {
+}).then((res) => {})
+  .catch((error) => {
+    // 支持多个promise的error冒泡
+  }).finally(() => {
+    // 无论promise状态如何，都会执行
   })
-}
-// test
-let p1 = new Promise(function (resolve, reject) {
-    setTimeout(function () {
-        resolve(1)
-    }, 1000)
-})
-let p2 = new Promise(function (resolve, reject) {
-    setTimeout(function () {
-        resolve(2)
-    }, 2000)
-})
-let p3 = new Promise(function (resolve, reject) {
-    setTimeout(function () {
-        resolve(3)
-    }, 3000)
-})
-promiseAll([p3, p1, p2]).then(res => {
-    console.log(res) // [3, 1, 2]
-})
 ```
 
-## 手写 Promise.race
-
-该方法的参数是 Promise 实例数组, 然后其 then 注册的回调方法是数组中的某一个 Promise 的状态变为 fulfilled 的时候就执行. 因为 Promise 的状态只能改变一次, 那么我们只需要把 Promise.race 中产生的 Promise 对象的 resolve 方法, 注入到数组中的每一个 Promise 实例中的回调函数中即可.
-
 ```js
-Promise.race = function (args) {
-  return new Promise((resolve, reject) => {
-    for (let i = 0, len = args.length; i < len; i++) {
-      args[i].then(resolve, reject)
+// promise实现
+const PENDING = "pending"
+const RESOLVED = "resolved"
+const REJECTED = "rejected"
+
+class MyPromise {
+    constructor(executor) {
+        // 初始化状态为 pending
+        this.status = PENDING
+        // 初始化成功状态的值
+        this.value = undefined
+        // 初始化失败状态的值
+        this.reason = undefined
+
+        this.onResolvedCallbacks = []
+        this.onRejectedCallbacks = []
+
+        // 定义 resolve 函数
+        const resolve = (value) => {
+            if (this.status === PENDING) {
+                // 更新状态为 resolved
+                this.status = RESOLVED
+                // 存储成功状态的值
+                this.value = value
+                // 执行所有成功状态的回调函数
+                this.onResolvedCallbacks.forEach((func) => func())
+            }
+        }
+
+        // 定义 reject 函数
+        const reject = (reason) => {
+            if (this.status === PENDING) {
+                // 更新状态为 rejected
+                this.status = REJECTED
+                // 存储失败状态的值
+                this.reason = reason
+                // 执行所有失败状态的回调函数
+                this.onRejectedCallbacks.forEach((func) => func())
+            }
+        }
+
+        try {
+            // 调用回调函数，将resolve和reject传递给它
+            executor(resolve, reject)
+        } catch(e) {
+            reject(e)
+        }
     }
-  })
+    then(onResolved, onRejected) {
+        // 如果onResolved是函数，则直接使用，否则默认为返回值不变的函数
+        onResolved = typeof onResolved === "function" ? onResolved : (value) => value
+        // 如果onRejected是函数，则直接使用，否则默认为抛出异常的函数
+        onRejected =
+            typeof onRejected === "function"
+                ? onRejected
+                : (reason) => {
+                      throw reason
+                  }
+        // 返回一个新的Promise对象
+        return new MyPromise((resolve, reject) => {
+            if (this.status == RESOLVED) {
+                try {
+                    // 如果当前状态为resolved，则调用onResolved函数处理值
+                    const x = onResolved(this.value)
+                    resolve(x)
+                } catch (error) {
+                    // 如果onResolved函数抛出异常，则调用reject函数
+                    reject(error)
+                }
+            }
+            if (this.status == REJECTED) {
+                try {
+                    // 如果当前状态为rejected，则调用onRejected函数处理原因
+                    const x = onRejected(this.reason)
+                    resolve(x)
+                } catch (error) {
+                    // 如果onRejected函数抛出异常，则调用reject函数
+                    reject(error)
+                }
+            }
+            if (this.status == PENDING) {
+                // 如果当前状态为pending，则将回调函数添加到对应的数组中
+                this.onResolvedCallbacks.push(() => {
+                    if (this.status == RESOLVED) {
+                        try {
+                            // 如果当前状态变为resolved，则调用onResolved函数处理值
+                            const x = onResolved(this.value)
+                            resolve(x)
+                        } catch (error) {
+                            // 如果onResolved函数抛出异常，则调用reject函数
+                            reject(error)
+                        }
+                    }
+                })
+                this.onRejectedCallbacks.push(() => {
+                    if (this.status == REJECTED) {
+                        try {
+                            // 如果当前状态变为rejected，则调用onRejected函数处理原因
+                            const x = onRejected(this.reason)
+                            resolve(x)
+                        } catch (error) {
+                            // 如果onRejected函数抛出异常，则调用reject函数
+                            reject(error)
+                        }
+                    }
+                })
+            } else {
+                // 执行完所有回调函数之后，清空回调数组
+                this.onResolvedCallbacks = []
+                this.onRejectedCallbacks = []
+            }
+        })
+    }
+    catch(onRejected) {
+        // 等同于then(null, onRejected)
+        return this.then(null, onRejected)
+    }
+
+    /**
+     * 将多个Promise对象合并为一个新的Promise对象
+     * @param {Array} promises - 包含多个Promise对象的数组
+     * @returns {MyPromise} - 合并后的Promise对象
+     */
+    static all(promises) {
+        return new MyPromise((resolve, reject) => {
+            let resolvedCount = 0
+            const values = new Array(promises.length)
+            for (let i = 0; i < promises.length; i++) {
+                if (!MyPromise.isPromise(promises[i])) {
+                    reject(new TypeError("Expected a Promise"))
+                    break
+                }
+
+                // 处理每个Promise
+                promises[i].then(
+                    (value) => {
+                        resolvedCount++
+                        values[i] = value
+
+                        // 当所有Promise都成功时，resolve结果数组
+                        if (resolvedCount === promises.length) {
+                            resolve(values)
+                        }
+                    },
+                    (reason) => {
+                        // 只要有一个Promise失败，就reject整个Promise.all的结果
+                        reject(reason)
+                    }
+                )
+            }
+        })
+    }
+
+    /**
+     * 判断是否为Promise对象
+     * @param {*} value - 待判断的对象
+     * @returns {boolean} - 是否为Promise对象
+     */
+    static isPromise(value) {
+        return (
+            value instanceof MyPromise ||
+            (typeof value === "object" && value !== null && typeof value.then === "function")
+        )
+    }
+    /**
+     * 执行一组Promise中的第一个完成（resolve或reject）的Promise
+     * @param {Array} promises - Promise对象数组
+     * @returns {MyPromise} - 新的Promise实例
+     */
+    static race(promises) {
+        return new MyPromise((resolve, reject) => {
+            for (let i = 0; i < promises.length; i++) {
+                if (!MyPromise.isPromise(promises[i])) {
+                    reject(new TypeError("Expected a Promise"))
+                    break
+                }
+
+                // 当任何一个Promise resolve或reject时，立即结束新Promise的状态
+                promises[i].then(
+                    (value) => {
+                        resolve(value)
+                    },
+                    (reason) => {
+                        reject(reason)
+                    }
+                )
+            }
+        })
+    }
 }
 ```
 
@@ -377,26 +369,26 @@ function throttle (func, delay) {
 
 ```js
 function getType(value) {
-  // 判断数据是 null 的情况
-  if (value === null) {
-    return value + "";
-  }
-  // 判断数据是引用类型的情况
-  if (typeof value === "object") {
-    let valueClass = Object.prototype.toString.call(value),
-      type = valueClass.split(" ")[1].split("");
-    type.pop();
-    return type.join("").toLowerCase();
-  } else {
-    // 判断数据是基本数据类型的情况和函数的情况
-    return typeof value;
-  }
+    // 判断数据是null的情况
+    if (value === null) {
+        return value + ""
+    }
+    // 判断数据是引用类型的情况
+    if (typeof value === "object") {
+        let valueClass = Object.prototype.toString.call(value),
+            type = valueClass.split(" ")[1].split("")
+        type.pop()
+        return type.join("").toLowerCase()
+    } else {
+        // 判断数据是基本数据类型的情况和函数的情况
+        return typeof value
+    }
 }
 ```
 
-## 手写 call 函数
+## 手写call函数??
 
-call 函数的实现步骤：
+call函数的实现步骤：
 判断调用对象是否为函数，即使我们是定义在函数的原型上的，但是可能出现使用 call 等方式调用的情况。
 判断传入上下文对象是否存在，如果不存在，则设置为 window 。
 处理传入的参数，截取第一个参数后的所有参数。
@@ -407,31 +399,31 @@ call 函数的实现步骤：
 
 ```js
 // call函数实现
-Function.prototype.myCall = function(context) {
-  // 判断调用对象
-  if (typeof this !== "function") {
-    console.error("type error");
-  }
-  // 获取参数
-  let args = [...arguments].slice(1),
-      result = null;
-  // 判断 context 是否传入，如果未传入则设置为 window
-  context = context || window;
-  // 将调用函数设为对象的方法
-  context.fn = this;
-  // 调用函数
-  result = context.fn(...args);
-  // 将属性删除
-  delete context.fn;
-  return result;
-};
+Function.prototype.myCall = function (context) {
+    // 判断调用对象
+    if (typeof this !== "function") {
+        console.error("type error")
+    }
+    // 获取参数
+    let args = [...arguments].slice(1),
+        result = null
+    // 判断 context 是否传入，如果未传入则设置为 window
+    context = context || window
+    // 将调用函数设为对象的方法
+    context.fn = this
+    // 调用函数
+    result = context.fn(...args)
+    // 将属性删除
+    delete context.fn
+    return result
+}
 ```
 
-## 手写 apply 函数
+## 手写apply函数??
 
-apply 函数的实现步骤：
-判断调用对象是否为函数，即使我们是定义在函数的原型上的，但是可能出现使用 call 等方式调用的情况。
-判断传入上下文对象是否存在，如果不存在，则设置为 window 。
+apply函数的实现步骤：
+判断调用对象是否为函数，即使我们是定义在函数的原型上的，但是可能出现使用call等方式调用的情况。
+判断传入上下文对象是否存在，如果不存在，则设置为window 。
 将函数作为上下文对象的一个属性。
 判断参数值是否传入
 使用上下文对象来调用这个方法，并保存返回结果。
@@ -462,7 +454,7 @@ Function.prototype.myApply = function(context) {
 };
 ```
 
-## 手写 bind 函数
+## 手写bind函数
 
 bind 函数的实现步骤：
 判断调用对象是否为函数，即使我们是定义在函数的原型上的，但是可能出现使用 call 等方式调用的情况。
@@ -490,39 +482,35 @@ Function.prototype.myBind = function(context) {
 };
 ```
 
-## 函数柯里化的实现
+## 函数柯里化实现
 
-函数柯里化指的是一种将使用多个参数的一个函数转换成一系列使用一个参数的函数的技术。
+函数柯里化概念：柯里化（Currying）是把接受多个参数的函数转变为接受一个单一参数的函数，并且返回接受余下的参数且返回结果的新函数的技术。
 
 ```js
-function curry(fn, args) {
-  // 获取函数需要的参数长度
-  let length = fn.length;
-
-  args = args || [];
-
-  return function() {
-    let subArgs = args.slice(0);
-
-    // 拼接得到现有的所有参数
-    for (let i = 0; i < arguments.length; i++) {
-      subArgs.push(arguments[i]);
+function curry(fn) {
+    return function curried (...args) {
+      // 如果传入的参数数量达到原函数的参数数量，则直接调用原函数
+        if (args.length >= fn.length) {
+            return fn.apply(this, args)
+        } else {
+        // 否则返回一个新的函数，继续接收参数
+            return function (...moreArgs) {
+                return curried.apply(this, args.concat(moreArgs))
+            }
+        }
     }
+}
+```
 
-    // 判断参数的长度是否已经满足函数所需参数的长度
-    if (subArgs.length >= length) {
-      // 如果满足，执行函数
-      return fn.apply(this, subArgs);
-    } else {
-      // 如果不满足，递归返回科里化的函数，等待参数的传入
-      return curry.call(this, fn, subArgs);
-    }
-  };
+## 实现 add(1)(2)(3)
+
+```js
+function add (x, y, z) {
+  return x + y + z
 }
-// es6 实现
-function curry(fn, ...args) {
-  return fn.length <= args.length ? fn(...args) : curry.bind(null, fn, ...args);
-}
+
+const curriedAdd = curry(add)
+console.log(curriedAdd(1)(2)(3))
 ```
 
 ## 实现AJAX请求
@@ -633,7 +621,7 @@ a = a - b
 [b, a] = [a, b]
 ```
 
-## 实现数组的乱序输出
+## 实现数组的乱序输出??
 
 主要的实现思路就是：
 取出数组的第一个元素，随机产生一个索引值，将该第一个元素和这个索引对应的元素进行交换。
@@ -789,11 +777,11 @@ function uniqueArray(array) {
 }
 ```
 
-## 实现数组的push方法??
+## 实现数组的push方法
 
 ```js
 let arr = []
-Array.prototype.push = function() {
+Array.prototype._push = function() {
   for( let i = 0; i < arguments.length; i++){
     this[this.length] = arguments[i]
   }
@@ -831,14 +819,16 @@ Array.prototype._map = function(fn) {
 }
 ```
 
-## 实现字符串的repeat方法??
+## 实现字符串的repeat方法
 
 ```js
 // 输入字符串s，以及其重复的次数，输出重复的结果，例如输入abc，2，输出abcabc。
 function repeat(s, n) {
+  console.log('====', new Array(n + 1))
     return (new Array(n + 1)).join(s);
 }
 
+repeat('abc', 2)
 // 递归：
 function repeat(s, n) {
     return (n > 0) ? s.concat(repeat(s, --n)) : "";
@@ -849,12 +839,12 @@ function repeat(s, n) {
 
 ```js
 // 在字符串的原型链上添加一个方法，实现字符串翻转：
-String.prototype._reverse = function(a){
+String.prototype._reverse = function (a) {
     return a.split("").reverse().join("")
 }
 var obj = new String()
-var res = obj._reverse ('hello')
-console.log(res);    // olleh
+var res = obj._reverse("hello")
+console.log(res) // olleh
 // 需要注意的是，必须通过实例化对象之后再去调用定义的方法，不然找不到该方法。
 ```
 
@@ -862,102 +852,6 @@ console.log(res);    // olleh
 
 ```js
 const pattern = /^[A-Z0-9]{13,15}$/
-```
-
-## 将一个对象数组转换为树形结构??
-
-```js
-// 输入
-const data = [
-  { id: 1, parentId: null, name: 'Root' },
-  { id: 2, parentId: 1, name: 'Child 1' },
-  { id: 3, parentId: 1, name: 'Child 2' },
-  { id: 4, parentId: 2, name: 'Child 1.1' },
-  { id: 5, parentId: 2, name: 'Child 1.2' },
-  { id: 6, parentId: 3, name: 'Child 2.1' },
-]
-
-// 输出
-
-const data1 = [
-  {
-    "id": 1,
-    "parentId": null,
-    "name": "Root",
-    "children": [
-      {
-        "id": 2,
-        "parentId": 1,
-        "name": "Child 1",
-        "children": [
-          {
-            "id": 4,
-            "parentId": 2,
-            "name": "Child 1.1",
-            "children": []
-          },
-          {
-            "id": 5,
-            "parentId": 2,
-            "name": "Child 1.2",
-            "children": []
-          }
-        ]
-      },
-      {
-        "id": 3,
-        "parentId": 1,
-        "name": "Child 2",
-        "children": [
-          {
-            "id": 6,
-            "parentId": 3,
-            "name": "Child 2.1",
-            "children": []
-          }
-        ]
-      }
-    ]
-  }
-]
-
-function arrayToTree(items) {
-  const rootItems = [];
-  const lookup = {};
-
-  // 初始化 lookup 表
-  for (const item of items) {
-    const itemId = item.id;
-    const parentId = item.parentId;
-
-    // 确保 lookup 表中有当前项
-    if (!lookup[itemId]) {
-      lookup[itemId] = { ...item, children: [] };
-    } else {
-      lookup[itemId] = { ...lookup[itemId], ...item };
-    }
-
-    const TreeItem = lookup[itemId];
-
-    // 处理根项
-    if (parentId === null) {
-      rootItems.push(TreeItem);
-    } else {
-      // 确保 lookup 表中有父项
-      if (!lookup[parentId]) {
-        lookup[parentId] = { children: [] };
-      }
-
-      // 将当前项添加到父项的 children 数组中
-      lookup[parentId].children.push(TreeItem);
-    }
-  }
-
-  return rootItems;
-}
-
-const treeData = arrayToTree(data);
-console.log(JSON.stringify(treeData, null, 2));
 ```
 
 ## 将数字每千分位用逗号隔开??
@@ -1015,24 +909,24 @@ Number.MIN_VALUE // 5e-324
 Number.MIN_SAFE_INTEGER // -9007199254740991
 ```
 
-如果想要对一个超大的整数(> Number.MAX_SAFE_INTEGER)进行加法运算，但是又想输出一般形式，那么使用 + 是无法达到的，一旦数字超过 Number.MAX_SAFE_INTEGER 数字会被立即转换为科学计数法，并且数字精度相比以前将会有误差。
+如果想要对一个超大的整数(> Number.MAX_SAFE_INTEGER)进行加法运算，但是又想输出一般形式，那么使用+是无法达到的，一旦数字超过 Number.MAX_SAFE_INTEGER数字会被立即转换为科学计数法，并且数字精度相比以前将会有误差。
 
 实现一个算法进行大数的相加：
 
 ```js
 function sumBigNumber(a, b) {
-  let res = '';
-  let temp = 0;
-  
-  a = a.split('');
-  b = b.split('');
-  
-  while (a.length || b.length || temp) {
-    temp += ~~a.pop() + ~~b.pop();
-    res = (temp % 10) + res;
-    temp  = temp > 9
-  }
-  return res.replace(/^0+/, '');
+    let res = ""
+    let temp = 0
+
+    a = a.split("")
+    b = b.split("")
+
+    while (a.length || b.length || temp) {
+        temp += ~~a.pop() + ~~b.pop()
+        res = (temp % 10) + res
+        temp = temp > 9
+    }
+    return res.replace(/^0+/, "")
 }
 ```
 
@@ -1043,56 +937,42 @@ function sumBigNumber(a, b) {
 判断当前位是否大于9，也就是是否会进位，若是则将temp赋值为true，因为在加法运算中，true会自动隐式转化为1，以便于下一次相加
 重复上述操作，直至计算结束
 
-## 函数柯里化实现??
+## 什么是类数组
 
-函数柯里化概念：柯里化（Currying）是把接受多个参数的函数转变为接受一个单一参数的函数，并且返回接受余下的参数且返回结果的新函数的技术。
-
-```js
-function curry(fn) {
-    return function curried (...args) {
-      // 如果传入的参数数量达到原函数的参数数量，则直接调用原函数
-        if (args.length >= fn.length) {
-            return fn.apply(this, args)
-        } else {
-        // 否则返回一个新的函数，继续接收参数
-            return function (...moreArgs) {
-                return curried.apply(this, args.concat(moreArgs))
-            }
-        }
-    }
-}
-```
-
-## 实现 add(1)(2)(3)??
-
-```js
-function add (x, y, z) {
-  return x + y + z
-}
-
-// function add (...args) {
-//   return args.reduce((a, b) => a + b)
-// }
-
-const curriedAdd = curry(add)
-console.log(curriedAdd(1)(2)(3))
-```
+类数组对象是指具有类似数组的特性，但不完全是数组的对象。类数组对象通常具有以下特征：
+有一个length属性：用于表示对象中元素的数量。
+可以通过索引访问元素：例如 obj[0]、obj[1] 等。
+尽管类数组对象看起来像数组，但它们并不具备数组的所有方法（如 push、pop、forEach 等）。常见的类数组对象包括函数的参数对象（arguments）、DOM 方法返回的结果（如 NodeList、HTMLCollection）、以及字符串等。
 
 ## 实现类数组转化为数组
 
-1. 通过call调用数组的slice方法来实现转换
-`Array.prototype.slice.call(arrayLike);`
+1.通过call调用数组的slice方法来实现转换
 
-2. 通过call调用数组的splice方法来实现转换
-`Array.prototype.splice.call(arrayLike, 0);`
+```js
+// `Array.prototype.slice.call(arrayLike)`
+function example() {
+    const argsArray = Array.prototype.slice.call(arguments)
+    console.log(argsArray) // 输出: 数组
+}
+example(1, 2, 3) // 示例调用
+```
 
-3. 通过apply调用数组的concat方法来实现转换
-`Array.prototype.concat.apply([], arrayLike);`
+2.通过call调用数组的splice方法来实现转换
+`Array.prototype.splice.call(arrayLike, 0)`
 
-4. 通过Array.from方法来实现转换
-`Array.from(arrayLike);`
+3.通过apply调用数组的concat方法来实现转换
+`Array.prototype.concat.apply([], arrayLike)`
 
-## 将js对象转化为树形结构？？
+4.通过Array.from方法来实现转换
+
+```js
+// `Array.from(arrayLike)`
+const nodeList = document.querySelectorAll('div');
+const array = Array.from(nodeList);
+console.log(array); // 输出: 数组
+```
+
+## 将js对象转化为树形结构
 
 ```js
 // 转换前：
@@ -1149,25 +1029,28 @@ function jsonToTree(data) {
     // 使用map，将当前对象的id与当前对象对应存储起来
     let map = {}
     data.forEach((item) => {
-        map[item.id] = item
+        map[item.id] = {
+          ...item,
+          children: []
+        }
     })
-    //
     data.forEach((item) => {
-        let parent = map[item.pid]
-        if (parent) {
-            ;(parent.children || (parent.children = [])).push(item)
+        if (item.pid) {
+            if (map[item.pid]) {
+                map[item.pid].children.push(map[item.id]);
+            }
         } else {
-            result.push(item)
+            result.push(map[item.id])
         }
     })
     return result
 }
 ```
 
-## 解析URL Params为对象？？
+## 解析URL Params为对象
 
 ```js
-const url = 'http://www.domain.com/?user=anonymous&id=123&id=456&city=%E5%8C%97%E4%BA%AC&enabled';
+const url = 'http://www.domain.com/?user=anonymous&id=123&id=456&city=%E5%8C%97%E4%BA%AC&enabled'
 parseParam(url)
 /* 结果
 { user: 'anonymous',
@@ -1177,25 +1060,29 @@ parseParam(url)
 }
 */
 function parseParam(url) {
-  const paramsStr = /.+\?(.+)$/.exec(url)[1] // 将 ? 后面的字符串取出来
-  const paramsArr = paramsStr.split('&') // 将字符串以 & 分割后存到数组中
-  let paramsObj = {};
-  // 将 params 存到对象中
-  paramsArr.forEach(param => {
-    if (/=/.test(param)) { // 处理有 value 的参数
-      let [key, val] = param.split('=') // 分割 key 和 value
-      val = decodeURIComponent(val) // 解码
-      val = /^\d+$/.test(val) ? parseFloat(val) : val // 判断是否转为数字
-      if (paramsObj.hasOwnProperty(key)) { // 如果对象有 key，则添加一个值
-        paramsObj[key] = [].concat(paramsObj[key], val);
-      } else { // 如果对象没有这个 key，创建 key 并设置值
-        paramsObj[key] = val
-      }
-    } else { // 处理没有 value 的参数
-      paramsObj[param] = true
-    }
-  })
-  return paramsObj
+    const paramsStr = /.+\?(.+)$/.exec(url)[1] // 将?后面的字符串取出来
+    const paramsArr = paramsStr.split("&") // 将字符串以&分割后存到数组中
+    let paramsObj = {}
+    // 将 params 存到对象中
+    paramsArr.forEach((param) => {
+        if (/=/.test(param)) {
+            // 处理有 value 的参数
+            let [key, val] = param.split("=") // 分割 key 和 value
+            val = decodeURIComponent(val) // 解码
+            val = /^\d+$/.test(val) ? parseFloat(val) : val // 判断是否转为数字
+            if (paramsObj.hasOwnProperty(key)) {
+                // 如果对象有key，则添加一个值
+                paramsObj[key] = [].concat(paramsObj[key], val)
+            } else {
+                // 如果对象没有这个key，创建 key 并设置值
+                paramsObj[key] = val
+            }
+        } else {
+            // 处理没有 value 的参数
+            paramsObj[param] = true
+        }
+    })
+    return paramsObj
 }
 ```
 
@@ -1348,7 +1235,7 @@ imageAsync("url")
 ```js
 class EventCenter{
     // 1. 定义事件容器，用来装事件数组
-      let handlers = {}
+    let handlers = {}
   
     // 2. 添加事件方法，参数：事件名 事件方法
     addEventListener(type, handler) {
@@ -1503,24 +1390,24 @@ subInstance.flag2;   // false
 
 ```js
 let obj = {}
-let input = document.getElementById('input')
-let span = document.getElementById('span')
+let input = document.getElementById("input")
+let span = document.getElementById("span")
 // 数据劫持
-Object.defineProperty(obj, 'text', {
-  configurable: true,
-  enumerable: true,
-  get() {
-    console.log('获取数据了')
-  },
-  set(newVal) {
-    console.log('数据更新了')
-    input.value = newVal
-    span.innerHTML = newVal
-  }
+Object.defineProperty(obj, "text", {
+    configurable: true,
+    enumerable: true,
+    get() {
+        console.log("获取数据了")
+    },
+    set(newVal) {
+        console.log("数据更新了")
+        input.value = newVal
+        span.innerHTML = newVal
+    },
 })
 // 输入监听
-input.addEventListener('keyup', function(e) {
-  obj.text = e.target.value
+input.addEventListener("keyup", function (e) {
+    obj.text = e.target.value
 })
 ```
 
@@ -1528,27 +1415,27 @@ input.addEventListener('keyup', function(e) {
 
 ```js
 // hash路由
-class Route{
-  constructor(){
-    // 路由存储对象
-    this.routes = {}
-    // 当前hash
-    this.currentHash = ''
-    // 绑定this，避免监听时this指向改变
-    this.freshRoute = this.freshRoute.bind(this)
-    // 监听
-    window.addEventListener('load', this.freshRoute, false)
-    window.addEventListener('hashchange', this.freshRoute, false)
-  }
-  // 存储
-  storeRoute (path, cb) {
-    this.routes[path] = cb || function () {}
-  }
-  // 更新
-  freshRoute () {
-    this.currentHash = location.hash.slice(1) || '/'
-    this.routes[this.currentHash]()
-  }
+class Route {
+    constructor() {
+        // 路由存储对象
+        this.routes = {}
+        // 当前hash
+        this.currentHash = ""
+        // 绑定this，避免监听时this指向改变
+        this.freshRoute = this.freshRoute.bind(this)
+        // 监听
+        window.addEventListener("load", this.freshRoute, false)
+        window.addEventListener("hashchange", this.freshRoute, false)
+    }
+    // 存储
+    storeRoute(path, cb) {
+        this.routes[path] = cb || function () {}
+    }
+    // 更新
+    freshRoute() {
+        this.currentHash = location.hash.slice(1) || "/"
+        this.routes[this.currentHash]()
+    }
 }
 ```
 
@@ -1589,9 +1476,10 @@ var lengthOfLongestSubstring = function (s) {
 
 ## 小孩报数问题??
 
-有30个小孩儿，编号从1-30，围成一圈依此报数，1、2、3 数到 3 的小孩儿退出这个圈， 然后下一个小孩 重新报数 1、2、3，问最后剩下的那个小孩儿的编号是多少?
+有30个小孩儿，编号从1-30，围成一圈依此报数，1、2、3 数到3的小孩儿退出这个圈， 然后下一个小孩新报数 1、2、3，问最后剩下的那个小孩儿的编号是多少?
 
 ```js
+// leetcode 412
 function childNum(num, count){
     let allplayer = [];    
     for(let i = 0; i < num; i++){
@@ -1669,38 +1557,6 @@ function handleRes(res) {
 }
 // 接口返回的数据格式
 handleRes({a: 1, b: 2})
-```
-
-## 判断对象是否存在循环引用??
-
-循环引用对象本来没有什么问题，但是序列化的时候就会发生问题，比如调用JSON.stringify()对该类对象进行序列化，就会报错: `Converting circular structure to JSON.`
-
-```js
-const isCycleObject = (obj, parent) => {
-    const parentArr = parent || [obj];
-    for(let i in obj) {
-        if(typeof obj[i] === 'object') {
-            let flag = false;
-            parentArr.forEach((pObj) => {
-                if(pObj === obj[i]){
-                    flag = true
-                }
-            })
-            if(flag) return true
-            flag = isCycleObject(obj[i],[...parentArr,obj[i]])
-            if(flag) return true
-        }
-    }
-    return false
-}
-
-const a = 1
-const b = {a}
-const c = {b}
-const o = {d:{a:3},c}
-o.c.b.aa = a
-
-console.log(isCycleObject(o)
 ```
 
 ## 查找有序二维数组的目标值

@@ -15,11 +15,9 @@ Javascript事件流是指在HTML文档中，事件的传播过程，即事件从
 2. 处于目标事件阶段
 3. 事件冒泡阶段
 
-## DOM事件
+## Javascript事件机制DOM事件
 
 ### DOM0（原生事件模型）
-
-只有两个阶段：处于目标事件和捕获阶段
 
 ```js
 // 绑定方案一
@@ -32,12 +30,17 @@ function btnClick2(){console.log('click!2')}
 </script>
 
 // 绑定方案二
+const btn = document.getElementById("btn")
 btn.onclick = function(){
 
 }
+
+// 清理事件
+btn.onclick = null
 ```
 
-特点：同一个元素绑定相同事件，后者会覆盖前者
+特点：同一个元素绑定相同事件，后者会覆盖前者，不存在兼容性问题
+事件流只有两个阶段：处于目标事件和捕获阶段
 
 ### DOM2（标准事件模型）
 
@@ -53,6 +56,7 @@ btn.removeEventListener('click',function(){
 ```
 
 特点：如果绑定了同一元素绑定了多个click 事件，都会执行，并且有先后顺序
+事件流包括三个阶段：事件捕获(capturing phase)、目标事件(target phase)、事件冒泡(bubbling phase)
 
 ## DOM3
 
@@ -88,7 +92,7 @@ e.returnValue = false // 阻止默认事件
 
 event.stopPropagation(): 阻止父类冒泡
 event.stopImmediatePropagation(): 阻止父类冒泡及当前节点的同类事件
-event.preventDefault(): 阻止默认事件
+event.preventDefault(): 阻止默认事件，例如点击一个链接（a标签），可以阻止跳转的行为
 
 ## 事件委托（代理）
 
@@ -100,7 +104,7 @@ event.preventDefault(): 阻止默认事件
 
 ```js
 // 父元素
-const parentElement = document.getElementById('parent');
+const parentElement = document.getElementById('parent')
 
 // 事件代理
 parentElement.addEventListener('click', function(event) {
@@ -112,7 +116,7 @@ parentElement.addEventListener('click', function(event) {
 
 ## 实现多浏览器的兼容事件绑定（兼容IE的事件监听）
 
-思路： 采用addEventListener && attachEvent
+思路：采用addEventListener && attachEvent
 
 ```js
 class bindEvent() {
@@ -167,6 +171,6 @@ class bindEvent() {
 target：指的是目标阶段。
 currentTarget：指的是捕获阶段，目标阶段和冒泡阶段。（一般指目标元素的父级）
 
-参考
+## 参考
 
-一文带你吃透【JS事件流】
+[一文带你吃透【JS事件流】](https://juejin.cn/post/7232726594208383035?searchId=202409041609498648DF073164181733E0)

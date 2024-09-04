@@ -378,9 +378,9 @@ React基于浏览器的事件机制实现了一套自身的事件机制，包括
 
 设计动机
 
-1. 在底层磨平不同浏览器的差异，React实现了统一的事件机制，不再需要处理浏览器事件机制方面的兼容问题
-2. React把握了事件机制的主动权，实现了对所有事件的中心化管控
-3. React引入事件池避免垃圾回收，在事件池中获取或释放事件对象，避免频繁的创建和销毁
+1. 底层磨平不同浏览器的差异：React实现了统一的事件机制，不再需要处理浏览器事件机制方面的兼容问题
+2. 优化性能：比如利用事件委托机制，大部分事件最终绑定到了Document，而不是DOM节点本身. 这样简化了DOM事件处理逻辑，减少了内存开销。
+3. React想对事件进行调度：react16引入Fiber架构，React 可以通过干预事件的分发以优化用户的交互体体验。
 
 合成事件的执行顺序
 
@@ -482,6 +482,8 @@ react组件会被编译为React.createElement,在createElement中，它的this�
 className只支持{styles.className}这种形式
 不方便动态修改样式
 4. css-in-js：指的是css是有js生成的，一般由第三方库提供，例如`styled-components`
+
+![css-in-js优缺点](./assets/react/css-in-jss.png "css-in-js优缺点")
 
 ```jsx
 // App.module.css
