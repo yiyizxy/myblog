@@ -55,5 +55,3 @@ class Husky extends Dog {
 4. 返回新对象，则返回该对象，否则，返回建的空对象作为thi新创建的对象
 
 ![new](./assets/class/new.png "new")
-
-

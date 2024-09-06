@@ -386,10 +386,10 @@ function getType(value) {
 }
 ```
 
-## 手写call函数??
+## 手写call函数
 
 call函数的实现步骤：
-判断调用对象是否为函数，即使我们是定义在函数的原型上的，但是可能出现使用 call 等方式调用的情况。
+判断调用对象是否为函数，即使我们是定义在函数的原型上的，但是可能出现使用call等方式调用的情况。
 判断传入上下文对象是否存在，如果不存在，则设置为 window 。
 处理传入的参数，截取第一个参数后的所有参数。
 将函数作为上下文对象的一个属性。
@@ -407,7 +407,7 @@ Function.prototype.myCall = function (context) {
     // 获取参数
     let args = [...arguments].slice(1),
         result = null
-    // 判断 context 是否传入，如果未传入则设置为 window
+    // 判断context是否传入，如果未传入则设置为window
     context = context || window
     // 将调用函数设为对象的方法
     context.fn = this
@@ -419,7 +419,7 @@ Function.prototype.myCall = function (context) {
 }
 ```
 
-## 手写apply函数??
+## 手写apply函数
 
 apply函数的实现步骤：
 判断调用对象是否为函数，即使我们是定义在函数的原型上的，但是可能出现使用call等方式调用的情况。
@@ -435,13 +435,13 @@ apply函数的实现步骤：
 Function.prototype.myApply = function(context) {
   // 判断调用对象是否为函数
   if (typeof this !== "function") {
-    throw new TypeError("Error");
+    throw new TypeError("Error")
   }
-  let result = null;
+  let result = null
   // 判断 context 是否存在，如果未传入则为 window
-  context = context || window;
+  context = context || window
   // 将函数设为对象的方法
-  context.fn = this;
+  context.fn = this
   // 调用方法
   if (arguments[1]) {
     result = context.fn(...arguments[1]);
@@ -456,11 +456,11 @@ Function.prototype.myApply = function(context) {
 
 ## 手写bind函数
 
-bind 函数的实现步骤：
-判断调用对象是否为函数，即使我们是定义在函数的原型上的，但是可能出现使用 call 等方式调用的情况。
+bind函数的实现步骤：
+判断调用对象是否为函数，即使我们是定义在函数的原型上的，但是可能出现使用call等方式调用的情况。
 保存当前函数的引用，获取其余传入参数值。
 创建一个函数返回
-函数内部使用 apply 来绑定函数调用，需要判断函数作为构造函数的情况，这个时候需要传入当前函数的 this 给 apply 调用，其余情况都传入指定的上下文对象。
+函数内部使用apply来绑定函数调用，需要判断函数作为构造函数的情况，这个时候需要传入当前函数的 this 给 apply 调用，其余情况都传入指定的上下文对象。
 
 ```js
 // bind 函数实现
@@ -502,7 +502,7 @@ function curry(fn) {
 }
 ```
 
-## 实现 add(1)(2)(3)
+## 实现add(1)(2)(3)
 
 ```js
 function add (x, y, z) {
@@ -1238,7 +1238,7 @@ class EventCenter{
     let handlers = {}
   
     // 2. 添加事件方法，参数：事件名 事件方法
-    addEventListener(type, handler) {
+    on(type, handler) {
       // 创建新数组容器
       if (!this.handlers[type]) {
         this.handlers[type] = []
@@ -1248,7 +1248,7 @@ class EventCenter{
     }
   
     // 3. 触发事件，参数：事件名 事件参数
-    dispatchEvent(type, params) {
+    emit(type, params) {
       // 若没有注册该事件则抛出错误
       if (!this.handlers[type]) {
         return new Error('该事件未注册')
@@ -1260,7 +1260,7 @@ class EventCenter{
     }
   
     // 4. 事件移除，参数：事件名 要删除事件，若无第二个参数则删除该事件的订阅和发布
-    removeEventListener(type, handler) {
+    off(type, handler) {
       if (!this.handlers[type]) {
         return new Error('事件无效')
       }
@@ -1606,6 +1606,57 @@ function printMatrix(arr){
 }
 ```
 
+## 按要求实现以下功能
+
+实现前端一个并发请求控制函数
+1.输入URL数组和限制请求数
+2.按照限制请求数控制前端同时可以并发请求数量
+3.请求操作直接用window.fetch
+
+```js
+// Example usage
+const urls = [
+    'https://api.example.com/data1',
+    'https://api.example.com/data2',
+    'https://api.example.com/data3',
+    // Add more URLs as needed
+];
+
+const limit = 2;
+
+async function concurrentRequests(urls, limit) {
+    const results = [];
+    const inFlightRequests = [];
+    
+    async function makeRequest(url) {
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            results.push(data);
+        } catch (error) {
+            results.push({ error: error.message });
+        }
+    }
+    
+    for (let i = 0; i < urls.length; i++) {
+        const request = makeRequest(urls[i]);
+        inFlightRequests.push(request);
+        
+        if (inFlightRequests.length === limit || i === urls.length - 1) {
+            await Promise.all(inFlightRequests);
+            inFlightRequests.length = 0;
+        }
+    }
+    
+    return results;
+}
+
+concurrentRequests(urls, limit)
+    .then(results => console.log(results))
+    .catch(error => console.error(error));
+```
+
 ## 参考
 
 [高频前端面试题汇总之手写代码篇](https://juejin.cn/post/6946136940164939813?searchId=202407292030586E131805AC0D04523E04)
+[2024前端高频面试题之-- JS篇](https://juejin.cn/post/7330065707358208010?searchId=202408292313519F58B7ACC69B97332EA1)

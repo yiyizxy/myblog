@@ -465,6 +465,143 @@ never表示函数永远不会正常返回，或者说函数会抛出异常或无
 通常never类型用于表示永远不会执行完的函数或抛出异常的函数，或者在类型系统中表示不可能发生的情况。
 可以将never类型赋值给任何其他类型，但是反过来不行。
 
+## 修饰符
+
+### public
+
+默认修饰符：如果没有显式指定修饰符，成员默认是public。
+访问权限：可以在类的内部、子类以及类的外部访问。
+
+```js
+class Animal {
+    public name: string;
+
+    constructor(name: string) {
+        this.name = name;
+    }
+
+    public move(distance: number): void {
+        console.log(`${this.name} moved ${distance} meters.`);
+    }
+}
+
+const dog = new Animal('Dog');
+console.log(dog.name); // 可以访问
+dog.move(10); // 可以访问
+```
+
+### private
+
+访问权限：只能在类的内部访问，不能在类的外部或子类中访问。
+
+```js
+class Animal {
+    private name: string;
+
+    constructor(name: string) {
+        this.name = name;
+    }
+
+    public move(distance: number): void {
+        console.log(`${this.name} moved ${distance} meters.`);
+    }
+}
+
+const dog = new Animal('Dog');
+// console.log(dog.name); // 错误: 属性“name”是私有的，不能在类的外部访问
+dog.move(10); // 可以访问
+```
+
+### protected
+
+访问权限：可以在类的内部和子类中访问，但不能在类的外部访问
+
+```js
+class Animal {
+    protected name: string;
+
+    constructor(name: string) {
+        this.name = name;
+    }
+
+    public move(distance: number): void {
+        console.log(`${this.name} moved ${distance} meters.`);
+    }
+}
+
+class Dog extends Animal {
+    constructor(name: string) {
+        super(name);
+    }
+
+    public bark(): void {
+        console.log(`${this.name} is barking.`); // 可以访问
+    }
+}
+
+const dog = new Dog('Dog');
+// console.log(dog.name); // 错误: 属性“name”受保护，不能在类的外部访问
+dog.move(10); // 可以访问
+dog.bark(); // 可以访问
+```
+
+### readonly
+
+访问权限：可以在类的内部和外部访问，但只能在声明时或构造函数中赋值，不能在其他地方修改。
+
+```js
+class Animal {
+    public readonly name: string;
+
+    constructor(name: string) {
+        this.name = name;
+    }
+
+    public move(distance: number): void {
+        console.log(`${this.name} moved ${distance} meters.`);
+    }
+}
+
+const dog = new Animal('Dog');
+console.log(dog.name); // 可以访问
+// dog.name = 'Cat'; // 错误: 无法分配到 "name" ，因为它是只读属性
+dog.move(10); // 可以访问
+```
+
+### 修饰符组合
+
+修饰符可以组合使用，例如protected readonly，表示成员既是受保护的，又是只读的：
+
+```js
+class Animal {
+    protected readonly name: string;
+
+    constructor(name: string) {
+        this.name = name;
+    }
+
+    public move(distance: number): void {
+        console.log(`${this.name} moved ${distance} meters.`);
+    }
+}
+
+class Dog extends Animal {
+    constructor(name: string) {
+        super(name);
+    }
+
+    public bark(): void {
+        console.log(`${this.name} is barking.`); // 可以访问
+    }
+}
+
+const dog = new Dog('Dog');
+// console.log(dog.name); // 错误: 属性“name”受保护，不能在类的外部访问
+dog.move(10); // 可以访问
+dog.bark(); // 可以访问
+```
+
+
 ## 参考
 
 [TypeScript TS](https://juejin.cn/post/6999985372440559624?searchId=202408011553468D2E043AF0EBBE5F6153)

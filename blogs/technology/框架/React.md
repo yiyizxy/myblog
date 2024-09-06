@@ -21,16 +21,11 @@ useId：一个新的Hook，用于生成在客户端和服务端两侧都独一�
 useSyncExternalStore：一个允许使用第三方状态管理库来支持并发模式的Hook。它消除了对useEffect的依赖，使得状态管理更加高效和灵活。
 useInsertionEffect：一个供CSS-in-JS库使用的Hook，用于在DOM变更发生后但在布局计算之前注入样式，以解决性能问题。
 
-- setState的异步和同步行为
+- 自动批处理[setState的异步和同步行为]
 
+在react17中，只有react事件会进行批处理，原生js事件、promise，setTimeout、setInterval不会
 默认异步更新：在React18中，setState默认以异步方式进行更新，这有助于减少不必要的重渲染并提高性能。但是，在某些情况下，你可能需要立即获取更新后的状态，这时可以使用flushSync方法来实现同步更新。
 flushSync：一个方法，用于强制React以同步方式执行setState调用。但需要注意的是，使用flushSync可能会对性能产生影响，因此应谨慎使用。
-
-- 自动批处理
-React 17不会在事件处理程序之外进行批处理，比如不会在一个promise中合并处理setState
-批处理是指，当React在一个单独的重渲染事件中批量处理多个状态更新以此实现优化性能。如果没有自动批处理的话，我们仅能够在React事件处理程序中批量更新。在React 18之前，默认情况下promise、setTimeout、原生应用的事件处理程序以及任何其他事件中的更新都不会被批量处理；但现在，这些更新内容都会被自动批处理：
-从 React 18 开始createRoot，所有更新都将自动批处理，无论它们来自何处。
-这意味着超时、promise、本机事件处理程序或任何其他事件内部的更新将以与 React 事件内部的更新相同的方式进行批处理。我们希望这会减少渲染工作，从而提高应用程序的性能：
 
 - Suspense支持SSR
 
@@ -39,7 +34,28 @@ React 17不会在事件处理程序之外进行批处理，比如不会在一个
 - 移除对IE浏览器的支持
 React 18不再支持Internet Explorer（IE）浏览器。这是React团队为了推动现代Web开发并减少维护老旧浏览器的负担而做出的决定。
 
+- react组件返回值更新
+在react17中，返回空组件只能返回null，显式返回undefined会报错
+在react18中，支持null和undefined返回
+
+- strict mode更新
+当你使用严格模式时，React会对每个组件返回两次渲染，以便你观察一些意想不到的结果,在react17中去掉了一次渲染的控制台日志，以便让日志容易阅读。react18取消了这个限制，第二次渲染会以浅灰色出现在控制台日志
+
 ## React19
+
+## React设计思想
+
+组件化 ：React采用组件化的设计思想，可以将UI划分为一系列独立、可复用的组件，每个组件都有自己的状态和逻辑。这种方式可以使代码的复用性、可读性和维护性大大提高。
+
+声明式编程：React采用声明式编程模式，开发者只需要描述他们希望的最终状态，而不需要关心如何达到这个状态。这使得代码更加简洁，易于理解和预测。
+
+虚拟 DOM：React引入了虚拟DOM的概念，它是对真实DOM的轻量级表示。当组件的状态变化时，React会创建一个新的虚拟DOM，并与旧的虚拟DOM进行比较，然后只更新实际DOM中发生变化的部分。这种方式可以避免直接操作DOM，从而提高性能。
+
+单向数据流：React采用单向数据流（也被称为单向绑定），父组件可以将属性（props）传递给子组件，但子组件不能修改接收到的props。这种方式保证了数据的流动性和可预测性，也使得应用的状态管理变得更加容易。
+
+JSX：React引入了JSX，这是一种JavaScript和XML的混合语法，使得JavaScript中可以编写类似HTML的标记语法。这种方式可以使得组件的结构更加清晰，代码更加易于编写和理解。
+
+钩子（Hooks）：React Hooks是React 16.8版本新增的特性，允许你在不编写class的情况下使用state以及其他的React特性。Hooks可以让你在现有的组件之间复用状态逻辑，而不需要改变你的组件结构，使得代码更加简洁，更易于管理和测试
 
 ## JSX是什么，它和JS有什么区别
 
@@ -94,6 +110,32 @@ React.createElement(App,null,lyllovelemon)
 ```
 
 ## React组件为什么不能返回多个元素，即React组件为什么只能有一个根元素？
+
+这个问题也可以理解为React组件为什么只能有一个根元素，原因：
+1.React组件最后会编译为render函数，函数的返回值只能是1个，如果不用单独的根节点包裹，就会并列返回多个值，这在js中是不允许的
+2.React的虚拟DOM是一个树状结构，树的根节点只能是1个，如果有多个根节点，无法确认是在哪棵树上进行更新
+
+```js
+class App extends React.Component{
+  render(){ 
+    return(
+    <div>
+     <h1 className="title">lyllovelemon</h1>
+      <span>内容</span>
+    </div>
+  )
+}
+
+//编译后
+class App extends React.Component{
+  render(){
+    return React.createElement('div',null,[
+      React.createElement('h1',{className:'title'},'lyllovelemon'),
+      React.createElement('span'),null,'内容'
+      ])
+  }
+}
+```
 
 ## 生命周期
 
@@ -213,6 +255,10 @@ export default ChatComponent;
 setState通常被认为是异步的，这意味着调用setState()时不会立刻改变react组件中state的值，多次setState函数调用产生的效果会合并。但是在promise、setTimeout、setInterval等定时器里变成了同步方法。
 React18以后，使用了createRoot api后，所有setState都是异步批量执行的，但如果你需要在某些情况下强制同步执行setState（例如，在测试或特定性能敏感的场景中），你可以使用flushSync函数。flushSync是React 18引入的一个新API，它允许你将传递给它的回调函数中的setState调用视为一个单独的更新批次，并立即执行这些更新。
 
+## 为什么不能在循环、条件或嵌套函数中调用Hooks？
+
+React依赖于Hooks调用的顺序来正确地关联Hook的状态。如果在循环或条件语句中调用Hooks，每次迭代或条件判断都可能产生新的Hook状态，这会导致React无法正确地关联状态和更新。
+
 ## Fiber架构
 
 React 16引入了Fiber架构，这是一种全新的协调引擎，通过增量渲染（拆分成多个小任务执行）、优先级调度（确保高优先级任务快速响应）和可中断恢复（允许在任务之间暂停和恢复）等机制，提高了React的性能和响应速度，使其能够更高效地处理复杂和高频的用户交互。
@@ -254,6 +300,16 @@ React 16引入了Fiber架构，这是一种全新的协调引擎，通过增量�
 增量渲染：Fiber将渲染工作分割成小的任务单元，能够在每一帧的时间内暂停和恢复渲染工作，从而不会阻塞浏览器的主线程，保证页面的交互性。
 优先级调度：可以为不同的更新任务设置优先级，优先处理更紧急和重要的更新，例如用户交互相关的更新。
 更高效的协调算法：通过新的算法更有效地对比新旧虚拟DOM，减少不必要的重新渲染，提高渲染性能。
+从实现角度来看，Fiber 为每个组件创建了一个 Fiber 节点，这些节点形成了一个链表结构，包含组件的各种信息，如类型、属性、状态等，方便进行高效的更新和协调操作。
+总之，Fiber 的引入极大地提升了 React 应用的性能和用户体验，使 React 能够更好地应对复杂和大规模的应用场景
+
+Fiber 是 React 16 引入的核心架构。
+Fiber 的主要目标是解决之前版本在渲染大型复杂组件树时可能出现的性能和用户体验问题。
+它带来了以下几个重要的改进：
+
+增量渲染：Fiber 将渲染工作分割成小的任务单元，能够在每一帧的时间内暂停和恢复渲染工作，从而不会阻塞浏览器的主线程，保证页面的交互性。
+优先级调度：可以为不同的更新任务设置优先级，优先处理更紧急和重要的更新，例如用户交互相关的更新。
+更高效的协调算法：通过新的算法更有效地对比新旧虚拟 DOM，减少不必要的重新渲染，提高渲染性能。
 从实现角度来看，Fiber 为每个组件创建了一个 Fiber 节点，这些节点形成了一个链表结构，包含组件的各种信息，如类型、属性、状态等，方便进行高效的更新和协调操作。
 总之，Fiber 的引入极大地提升了 React 应用的性能和用户体验，使 React 能够更好地应对复杂和大规模的应用场景
 
@@ -669,19 +725,256 @@ React Portals是React提供的一种将子节点渲染到DOM节点树中的不�
 ReactDOM.createPortal(child, container)
 ```
 
-## react 中组件销毁时会自动回收ref么？
+## react中组件销毁时会自动回收ref么？
 
 在React中，组件销毁时并不会自动回收ref。ref是一个特殊的属性，用于引用组件实例或DOM元素，在组件销毁时，ref引用的对象并不会自动被销毁，而是需要手动进行清理操作。
 
+## useEffect和useLayoutEffect区别
+
+### useEffect
+
+**异步执行，不阻塞浏览器绘制，适用于大多数副作用操作。适用于不需要在DOM更新之后立即执行的副作用，例如数据获取、订阅等**
+执行过程是这样的：
+触发了一个导致重新渲染的操作（改变state、props改变）
+react重新渲染组件（调用）
+屏幕可以看到更新
+useEffect的回调执行
+
+### useLayoutEffect
+
+**同步执行，阻塞浏览器绘制，适用于需要在 DOM 更新之后立即执行的操作。例如测量DOM元素尺寸、同步布局等。这些操作需要在浏览器绘制之前完成，以确保布局的一致性。**
+执行过程是这样的：
+触发了一个导致重新渲染的操作（改变state、props改变）
+react重新渲染组件（调用）
+useLayoutEffect回调函数执行
+屏幕看到更新
+
+如果发现了屏幕闪烁的问题，可以考虑用useLayoutEffect解决
+
+总的来说，useEffect适用于大多数常见的副作用操作，而useLayoutEffect则更适用于那些对页面布局有即时性要求且执行较快的操作。
+
+## useRef和createRef的区别
+
+useRef和createRef都是用于创建引用的工具，但它们的使用场景和行为不同。
+useRef主要用于函数组件，返回的引用对象在组件的整个生命周期内保持不变，并且更新引用不会触发重新渲染。
+createRef主要用于类组件，每次渲染都会返回一个新的引用对象。
+
+```js
+// useRef
+import React, { useRef, useEffect } from 'react';
+
+function MyComponent() {
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    inputRef.current.focus();
+  }, []);
+
+  return (
+    <input ref={inputRef} type="text" />
+  );
+}
+
+export default MyComponent;
+```
+
+```js
+// createRef
+import React, { Component } from 'react';
+
+class MyComponent extends Component {
+  constructor(props) {
+    super(props);
+    this.inputRef = React.createRef();
+  }
+
+  componentDidMount() {
+    this.inputRef.current.focus();
+  }
+
+  render() {
+    return (
+      <input ref={this.inputRef} type="text" />
+    );
+  }
+}
+
+export default MyComponent;
+```
+
+## useReducer
+
+是React中的一个Hook，用于在函数组件中管理复杂的状态逻辑。它类似于useState，但更适合处理包含多个子值的复杂状态，或者当下一个状态依赖于之前的状态时。
+
+使用：
+
+```js
+const [state, dispatch] = useReducer(reducer, initialState);
+```
+
+reducer：一个函数，接受当前状态和一个动作，并返回新的状态。
+initialState：状态的初始值。
+state：当前状态。
+dispatch：用于分发动作以触发状态更新的函数。
+
+例子：
+
+```jsx
+import React, { useReducer } from 'react'
+
+const initialState = { count: 0 };
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'increment':
+      return { count: state.count + 1 }
+    case 'decrement':
+      return { count: state.count - 1 }
+    default:
+      throw new Error();
+  }
+}
+
+function Counter() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  return (
+    <div>
+      <p>Count: {state.count}</p>
+      <button onClick={() => dispatch({ type: 'increment' })}>Increment</button>
+      <button onClick={() => dispatch({ type: 'decrement' })}>Decrement</button>
+    </div>
+  );
+}
+
+export default Counter
+```
+
+## useContext
+
+useContext是React中的一个Hook，用于在函数组件中使用React的Context API。Context API允许你在组件树中共享状态，而不必显式地通过每一层组件传递props。useContext使得在函数组件中访问Context变得更加简洁和直观。
+
+```jsx
+import React, { createContext, useContext, useState } from 'react';
+
+// 创建一个 Context 对象
+const MyContext = createContext();
+
+// 创建一个提供者组件
+function MyProvider({ children }) {
+  const [value, setValue] = useState('Hello, World!');
+
+  return (
+    <MyContext.Provider value={{ value, setValue }}>
+      {children}
+    </MyContext.Provider>
+  );
+}
+
+// 在组件中使用useContext
+function MyComponent() {
+  const { value, setValue } = useContext(MyContext);
+
+  return (
+    <div>
+      <p>{value}</p>
+      <button onClick={() => setValue('Hello, React!')}>Change Value</button>
+    </div>
+  );
+}
+
+// 组合组件
+function App() {
+  return (
+    <MyProvider>
+      <MyComponent />
+    </MyProvider>
+  );
+}
+export default App;
+```
+
+## useId
+
+是React 18中引入的一个新的Hook，用于生成稳定的唯一ID。这对于需要在服务器端渲染（SSR）和客户端渲染（CSR）之间保持一致的唯一标识符特别有用。它可以帮助你在不依赖外部库的情况下生成唯一ID，适用于表单元素、ARIA属性等需要唯一标识符的场景。
+
+例子：
+
+```js
+// 多个元素使用，nameId和emailId会生成唯一id
+import React, { useId } from 'react';
+
+function FormComponent() {
+  const nameId = useId();
+  const emailId = useId();
+
+  return (
+    <form>
+      <div>
+        <label htmlFor={nameId}>Name:</label>
+        <input id={nameId} type="text" />
+      </div>
+      <div>
+        <label htmlFor={emailId}>Email:</label>
+        <input id={emailId} type="email" />
+      </div>
+    </form>
+  );
+}
+
+export default FormComponent;
+```
+
+
+```jsx
+// 在 SSR 和 CSR 之间保持一致的唯一标识符是 useId 的一个重要特性
+import React, { useId } from 'react';
+import ReactDOMServer from 'react-dom/server';
+
+function MyComponent() {
+  const id = useId();
+
+  return (
+    <div>
+      <label htmlFor={id}>Enter your name:</label>
+      <input id={id} type="text" />
+    </div>
+  );
+}
+
+// 服务器端渲染
+const html = ReactDOMServer.renderToString(<MyComponent />);
+console.log(html);
+
+// 客户端渲染
+// ReactDOM.hydrate(<MyComponent />, document.getElementById('root'));
+```
+
+## react与vue的区别
+
+### react
+
+- 使用单向数据流，即数据只能从父组件流向子组件，子组件不能修改父组件的数据
+- 组件定义方式上，只能用jsx
+- 模版语法上，使用jsx语法
+- 扩展方式上，react通过社区提供的第三方库来扩展能力
+- 性能上，react的渲染速度没有vue快
+- 状态管理上，使用redux或者context进行管理
+- 社区更大更丰富，拥有更多的第三方库和插件
+
+### vue
+
+- 使用双向数据流
+- 既可以用jsx也可以用模板
+- 使用类似html的模板语法
+- 提供了一些内置指令和组件，可以方便扩展
+- 比react快，因为在虚拟dom以及编译器方面做了优化
+- 使用vuex
+
+
 ## 参考
 
+[React面试题](https://juejin.cn/post/7405769445028020250?searchId=20240831144828E107E3A667816E018A4D)
 [React系列面试题](https://juejin.cn/post/7395866537495134271?searchId=20240831144828E107E3A667816E018A4D)
 [参考](https://juejin.cn/post/7349971654590857216)
 [一文带你梳理React面试题（2023年版本）](https://juejin.cn/post/7182382408807743548)
-
-
-script start
-async1 start
-async2
-promise1
-script end

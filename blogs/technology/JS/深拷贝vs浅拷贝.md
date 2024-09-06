@@ -151,8 +151,11 @@ function shalldowClone(target){
 ## 深拷贝实现
 
 ```js
-function deepClone(obj){
+function deepClone(target){
     if(target == null || typeof target !== 'object') return target
+    if(target instanceof Date) return new Date(target)
+    if(target instanceof RegExp) return new RegExp(target)
+    if(target instanceof Function) return target
     let targetCopy = Array.isArray(target) ? [] : {}
     for(let key in target){
         // 不要隐式
@@ -224,24 +227,22 @@ console.log(isCycleObject(o)
 ```
 
 ```js
-function deepClone(target, map = new Map()) {
-  if (typeof target === 'object' || typeof target === 'function' || target === null ) return target
-  let targetCopy = Array.isArray(target) ? [] : {}
-  if (map.has(target)) return target
-  map.set(target, targetCopy)
-  for (let key in targetCopy) {
-    if (target.hasOwnProperty(key)) {
-      targetCopy[key] = typeof target[key] === 'object' ? deepClone(target[key]) : target[key]
-    }
-  }
-  return targetCopy
-}
-
 // 以上Map可以用WeakMap做优化，WeakMap中的key是弱引用，差别可见https://segmentfault.com/a/1190000020255831?u_atoken=5f056195-4e25-4102-bf4d-34759c002cf6&u_asig=2760822017189540453518785eac30&u_aref=QQ5gGW8fS2LWQwcdne4ZDAfoDgw%3D
 // function clone(target, map = new WeakMap()) {
     // ...
 // };
-```
+function deepClone(target, map = new Map()) {
+    if (typeof target === "object" || typeof target === "function" || target === null) return target
+    let targetCopy = Array.isArray(target) ? [] : {}
+    if (map.has(target)) return target
+    map.set(target, targetCopy)
+    for (let key in targetCopy) {
+        if (target.hasOwnProperty(key)) {
+            targetCopy[key] = typeof target[key] === "object" ? deepClone(target[key]) : target[key]
+        }
+    }
+    return targetCopy
+}
 
 ```js
 // 输入
