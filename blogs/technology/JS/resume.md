@@ -8,7 +8,7 @@ categories:
 ---
 
 个人情况
--精通HTML/CSS/JS、Git、React，熟悉Node、SSR，了解Vue、小程序
+-精通HTML/CSS/JS、Git、React，熟悉Node、SSR、小程序，了解Vue；
 -熟悉wepack，具备一定的工程能力；
 -具备丰富的C端和B端开发经验，涵盖广告、内容、增长、城市运营相关业务
 -出色的沟通能力：统筹过多个跨部门、跨团队项目落地，合作过的同事以及身边同事评价都比较高
