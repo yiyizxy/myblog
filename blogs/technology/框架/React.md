@@ -539,7 +539,7 @@ className只支持{styles.className}这种形式
 不方便动态修改样式
 4. css-in-js：指的是css是有js生成的，一般由第三方库提供，例如`styled-components`
 
-![css-in-js优缺点](./assets/react/css-in-jss.png "css-in-js优缺点")
+![css-in-js优缺点](./assets/react/css-in-js.png "css-in-js优缺点")
 
 ```jsx
 // App.module.css
