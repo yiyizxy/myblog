@@ -24,7 +24,7 @@ history路由需要后端配合改（ningix）,支持SSR
 
 1.`<Route>`路径的变化
 
-* 占位符 * 和 :id可以用，正则不能用了
+* 占位符`*`和`:id`可以用，正则不能用了
 * v6中的所有路径匹配都将忽略URL上的尾部"/"
 
 ```bash
@@ -74,12 +74,10 @@ history路由需要后端配合改（ningix）,支持SSR
 
 // Content
 import { Outlet } from 'react-router-dom'
-
 function Content() {
   return (
     <div>
       <title>这是Content</title>
-      
       {/* 这里渲染子路由！！ */}
       <Outlet />
       {/* 这里渲染子路由！！ end */}
@@ -145,6 +143,69 @@ const routes = {
 function RenderRoutes() {
     const element = useRoutes(routes)
     return element;
+}
+```
+
+## React-routerV6引入的hooks有哪些？
+
+useLocation获取当前页路径以及从哪个页面跳转过来
+
+```js
+import { useLocation } from "react-router-dom"
+
+const About = () => {
+  const location = useLocation()
+  const { from, pathname } = location
+  return (
+    <>
+      now you are in {pathname}, and you are from {from} page
+    </>
+  );
+};
+export default About
+
+```
+
+useNavigate实现页面跳转
+
+```js
+import { useNavigate } from "react-router-dom"
+
+const Login = () => {
+  const navigate = useNavigate()
+  return (
+    <>
+      login
+      <button
+        onClick={() => {
+          navigate("/about")
+        }}
+      >
+        跳转到关于页面
+      </button>
+    </>
+  )
+}
+export default Login
+```
+
+## 默认显式二级路由
+
+去掉原本的Route标签中的path属性，改为添加index属性
+
+```js
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />}>
+          <Route path="board" element={<Board />}></Route>
+          <Route index element={<Article />}></Route>
+        </Route>
+        <Route path="/login" element={<Login />}></Route>
+      </Routes>
+    </BrowserRouter>
+  )
 }
 ```
 

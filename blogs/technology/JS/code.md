@@ -1656,6 +1656,14 @@ concurrentRequests(urls, limit)
     .catch(error => console.error(error));
 ```
 
+## 如何让`var [a, b] = {a: 1, b: 2}`解构赋值成功？
+
+```js
+Object.prototype[Symbol.iterator] = function() {
+    return Object.values(this)[Symbol.iterator]()
+}
+```
+
 ## 参考
 
 [高频前端面试题汇总之手写代码篇](https://juejin.cn/post/6946136940164939813?searchId=202407292030586E131805AC0D04523E04)
