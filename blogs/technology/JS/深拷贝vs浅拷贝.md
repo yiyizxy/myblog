@@ -91,7 +91,7 @@ console.log(newArr) // [ 1, 2, 3, { a: 1 } ]
 
 ### JSON.stringify
 
-**拷贝的对象的值中如果有函数、undefined、symbol 这几种类型，经过JSON.stringify序列化之后的字符串中这个键值对会消失；**
+**拷贝的对象的值中如果有函数、undefined、symbol这几种类型，经过JSON.stringify序列化之后的字符串中这个键值对会消失；**
 **拷贝Date引用类型会变成字符串；**
 **无法拷贝不可枚举的属性；**
 **无法拷贝对象的原型链；**
@@ -133,6 +133,7 @@ console.log(obj1.b.f === obj2.b.f) // false
 ## 浅拷贝实现
 
 ```js
+// 浅拷贝
 function shalldowClone(target){
     // 只拷贝引用类型
     if(!target || typeof target !== 'object') return target
@@ -141,6 +142,19 @@ function shalldowClone(target){
         // 不要隐式,hasOwnProperty返回true则代表属性在实例上
         if(target.hasOwnProperty(key)){
             // objCopy.key是个字符串,[]可以当成变量
+            targetCopy[key] = target[key]
+        }
+    }
+    return targetCopy
+}
+```
+
+```js
+function deepClone(target) {
+    if (!target || typeof target !== 'object') return target
+    let targetCopy = Array.isArray(target) ? [] : {}
+    for (let key in target) {
+        if (target.hasOwnProperty(key)) {
             targetCopy[key] = target[key]
         }
     }
@@ -196,9 +210,6 @@ target.target = target
 **先了解下如何判断对象是否存在循环引用？**
 
 ```js
-```
-
-```js
 const isCycleObject = (obj, parent) => {
     const parentArr = parent || [obj];
     for(let i in obj) {
@@ -231,18 +242,24 @@ console.log(isCycleObject(o)
 // function clone(target, map = new WeakMap()) {
     // ...
 // };
-function deepClone(target, map = new Map()) {
-    if (typeof target === "object" || typeof target === "function" || target === null) return target
+// function deepClone(target, map = new Map()) {
+// 深拷贝
+function deepClone(target, map = new WeakMap()) {
+    if(target == null || typeof target !== 'object') return target
+    if(target instanceof Date) return new Date(target)
+    if(target instanceof RegExp) return new RegExp(target)
+    if(target instanceof Function) return target
     let targetCopy = Array.isArray(target) ? [] : {}
-    if (map.has(target)) return target
+    if (map.has(target)) return map.get(target)
     map.set(target, targetCopy)
-    for (let key in targetCopy) {
+    for (let key in target) {
         if (target.hasOwnProperty(key)) {
-            targetCopy[key] = typeof target[key] === "object" ? deepClone(target[key]) : target[key]
+            targetCopy[key] = deepClone(target[key])
         }
     }
     return targetCopy
 }
+```
 
 ```js
 // 输入

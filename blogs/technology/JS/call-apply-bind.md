@@ -48,17 +48,17 @@ Function.prototype.myBind = function () {
         return _this.myApply(newThis, args)
     }
 }
+```
 
+### 手撕apply
+
+```js
 Function.prototye.myApply = function(context) {
     context = context || window
     // 挂载执行函数
     context.fn = this
-
     let result = arguments[1] ? context.fn(...arguments[1]) : context.fn()
-
     delete context.fn()
-
     return result
-
 }
 ```

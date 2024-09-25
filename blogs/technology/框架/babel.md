@@ -121,10 +121,10 @@ core-js@2 的引入路径相对更加简单。
 
 ## Babel7变更
 
-* preset变更：淘汰es201x，删除 stage-x，推荐 env
+* preset变更：淘汰es201x，删除stage-x，推荐env
 * 废弃@babel/polyfill
-* 包名称变化：把所有babel-*重命名为 @babel/*
-* 低版本node不再支持，不再支持 nodejs 0.10, 0.12, 4, 5 这四个版本，相当于要求 nodejs >= 6
+* 包名称变化：把所有babel-*重命名为@babel/*
+* 低版本node不再支持，不再支持nodejs 0.10, 0.12, 4, 5这四个版本，相当于要求nodejs >= 6
 
 ## 参考
 

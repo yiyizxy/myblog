@@ -7,7 +7,7 @@ categories:
  - javascript
 ---
 
-## 手写 Object.create
+## 手写Object.create
 
 思路：将传入的对象作为原型
 
@@ -21,10 +21,9 @@ function create(obj) {
 
 ## 手写instanceof方法
 
-instanceof 运算符用于判断构造函数的 prototype 属性是否出现在对象的原型链中的任何位置。
+instanceof运算符用于判断对象是否为构造函数实例
 
 实现步骤：
-
 首先获取类型的原型
 然后获得对象的原型
 然后一直循环判断对象的原型是否等于类型的原型，直到对象原型为 null，因为原型链最终为 null
@@ -33,14 +32,13 @@ instanceof 运算符用于判断构造函数的 prototype 属性是否出现在�
 ```js
 function myInstanceof(left, right) {
   let proto = Object.getPrototypeOf(left), // 获取对象的原型
-      prototype = right.prototype; // 获取构造函数的 prototype 对象
+      prototype = right.prototype // 获取构造函数的prototype对象
 
-  // 判断构造函数的 prototype 对象是否在对象的原型链上
+  // 判断构造函数的prototype对象是否在对象的原型链上
   while (true) {
-    if (!proto) return false;
-    if (proto === prototype) return true;
-
-    proto = Object.getPrototypeOf(proto);
+    if (!proto) return false
+    if (proto === prototype) return true
+    proto = Object.getPrototypeOf(proto)
   }
 }
 ```
@@ -77,13 +75,13 @@ console.log(t.name) // 'undefined'
 
 ```js
 // 手撕new操作符
-function myNew(constructor, ...args) {
+function myNew(Func, ...args) {
     // 1.创建一个新的空对象 
     const obj = {}
-    // 2.将这个新对象的内部原型链接到构造函数的prototype对象  
-    obj.__proto__ = constructor.prototype
+    // 2.将新对象与构造函数通过原型链的方式连接起来
+    obj.__proto__ = Func.prototype
     // 3.将这个新对象作为this上下文，并调用构造函数  
-    let result = constructor.apply(obj, args)
+    let result = Func.apply(obj, args)
     // 4.如果构造函数返回的是一个对象，则返回这个对象；否则返回新创建的对象
     return result instanceOf Object ? result : obj
 }
@@ -111,7 +109,6 @@ const promise = new Promise((resove, reject) => {
 const PENDING = "pending"
 const RESOLVED = "resolved"
 const REJECTED = "rejected"
-
 class MyPromise {
     constructor(executor) {
         // 初始化状态为 pending
@@ -120,10 +117,8 @@ class MyPromise {
         this.value = undefined
         // 初始化失败状态的值
         this.reason = undefined
-
         this.onResolvedCallbacks = []
         this.onRejectedCallbacks = []
-
         // 定义 resolve 函数
         const resolve = (value) => {
             if (this.status === PENDING) {
@@ -135,7 +130,6 @@ class MyPromise {
                 this.onResolvedCallbacks.forEach((func) => func())
             }
         }
-
         // 定义 reject 函数
         const reject = (reason) => {
             if (this.status === PENDING) {
@@ -147,7 +141,6 @@ class MyPromise {
                 this.onRejectedCallbacks.forEach((func) => func())
             }
         }
-
         try {
             // 调用回调函数，将resolve和reject传递给它
             executor(resolve, reject)
@@ -301,7 +294,7 @@ class MyPromise {
 
 ## 手写防抖函数
 
-函数防抖是指在事件被触发 n 秒后再执行回调，如果在这 n 秒内事件又被触发，则重新计时。这可以使用在一些点击请求的事件上，避免因为用户的多次点击向后端发送多次请求。
+函数防抖是指在事件被触发n秒后再执行回调，如果在这n秒内事件又被触发，则重新计时。这可以使用在一些点击请求的事件上，避免因为用户的多次点击向后端发送多次请求。
 
 ```js
 function debounce(fn, wait) {
@@ -375,8 +368,8 @@ function getType(value) {
     }
     // 判断数据是引用类型的情况
     if (typeof value === "object") {
-        let valueClass = Object.prototype.toString.call(value),
-            type = valueClass.split(" ")[1].split("")
+        let valueClass = Object.prototype.toString.call(value)
+        let type = valueClass.split(" ")[1].split("")
         type.pop()
         return type.join("").toLowerCase()
     } else {
@@ -467,19 +460,19 @@ bind函数的实现步骤：
 Function.prototype.myBind = function(context) {
   // 判断调用对象是否为函数
   if (typeof this !== "function") {
-    throw new TypeError("Error");
+    throw new TypeError("Error")
   }
   // 获取参数
   var args = [...arguments].slice(1),
-      fn = this;
+      fn = this
   return function Fn() {
     // 根据调用方式，传入不同绑定值
     return fn.apply(
       this instanceof Fn ? this : context,
       args.concat(...arguments)
-    );
-  };
-};
+    )
+  }
+}
 ```
 
 ## 函数柯里化实现
@@ -487,6 +480,7 @@ Function.prototype.myBind = function(context) {
 函数柯里化概念：柯里化（Currying）是把接受多个参数的函数转变为接受一个单一参数的函数，并且返回接受余下的参数且返回结果的新函数的技术。
 
 ```js
+// 柯里化
 function curry(fn) {
     return function curried (...args) {
       // 如果传入的参数数量达到原函数的参数数量，则直接调用原函数
@@ -526,21 +520,21 @@ AJAX是Asynchronous JavaScript and XML的缩写，指的是通过JavaScript的�
 ```js
 const SERVER_URL = "/server";
 let xhr = new XMLHttpRequest();
-// 创建 Http 请求
+// 创建Http请求
 xhr.open("GET", SERVER_URL, true,  'username[可选]', 'password[可选]');
 // 设置状态监听函数
 xhr.onreadystatechange = function() {
-  if (this.readyState !== 4) return;
+  if (xhr.readyState !== 4) return;
   // 当请求成功时
-  if (this.status === 200) {
-    handle(this.response);
+  if (xhr.status === 200) {
+    handle(xhr.response);
   } else {
-    console.error(this.statusText);
+    console.error(xhr.statusText);
   }
 };
 // 设置请求失败时的监听函数
 xhr.onerror = function() {
-  console.error(this.statusText);
+  console.error(xhr.statusText);
 };
 // 设置请求头信息
 xhr.responseType = "json";
@@ -556,38 +550,73 @@ xhr.send(null);
 // 4-已完成请求
 ```
 
+```js
+const xhr = new XMLHttpRequest()
+xhr.open('GET', 'url', true)
+xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+        if (xhr.status === 200)
+    }
+
+}
+xhr.onerror = function () {
+
+}
+xhr.send(null)
+xhr.onerror = function (err) {
+
+}
+```
+
 ## 使用Promise封装AJAX请求
 
 ```js
-// promise 封装实现：
-function getJSON(url) {
-  // 创建一个 promise 对象
-  let promise = new Promise(function(resolve, reject) {
-    let xhr = new XMLHttpRequest();
-    // 新建一个 http 请求
-    xhr.open("GET", url, true);
-    // 设置状态的监听函数
-    xhr.onreadystatechange = function() {
-      if (this.readyState !== 4) return;
-      // 当请求成功或失败时，改变 promise 的状态
-      if (this.status === 200) {
-        resolve(this.response);
-      } else {
-        reject(new Error(this.statusText));
-      }
-    };
-    // 设置错误监听函数
-    xhr.onerror = function() {
-      reject(new Error(this.statusText));
-    };
-    // 设置响应的数据类型
-    xhr.responseType = "json";
-    // 设置请求头信息
-    xhr.setRequestHeader("Accept", "application/json");
-    // 发送 http 请求
-    xhr.send(null);
-  });
-  return promise;
+function ajax(options) {
+	const { url, method, async, timeout, data } = options
+	const xhr = new XMLHttpRequest()
+	return new Promise((resolve, reject) => {
+		xhr.onreadyStateChange = function () {
+			if (xhr.readyState === 4) {
+				if (xhr.status === 200) {
+					resolve && resolve(xhr.responseText)
+				} else {
+					reject && reject()
+				}
+			}
+		}
+		// 超时
+		xhr.timeout = () => reject && reject('超时')
+		xhr.onerror = (err) => reject && reject(err)
+
+		let _params = []
+		let encodeData
+
+        // 参数处理
+		if (data instanceOf Object) {
+			for (let key in data) {
+				_params.push(`${encodeURIComponent(key)}=${encodeURIComponent(Object[key])}`)
+			}
+			encodeData = _params.join('&')
+		}
+		// 方法处理
+		if (method === 'get') {
+			const index = url.indexOf('?')
+			if (index === -1) {
+				url += '?'
+			} else {
+				url += '&'
+			}
+			url += encodeData
+		}
+        // 建立连接
+		xhr.open(method, url, async)
+		if (method === 'get') {
+			xhr.send(null)
+		} else {
+			xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded;chartset=UTF-8')
+			xhr.send(encodeData)
+		}
+	})
 }
 ```
 
@@ -789,31 +818,31 @@ Array.prototype._push = function() {
 }
 ```
 
-## 实现数组的filter方法??
+## 实现数组的filter方法
 
 ```js
 Array.prototype._filter = function(fn) {
     if (typeof fn !== "function") {
-        throw Error('参数必须是一个函数');
+        throw Error('参数必须是一个函数')
     }
-    const res = [];
+    const res = []
     for (let i = 0, len = this.length; i < len; i++) {
-        fn(this[i]) && res.push(this[i]);
+        fn(this[i]) && res.push(this[i])
     }
-    return res;
+    return res
 }
 ```
 
-## 实现数组的map方法??
+## 实现数组的map方法
 
 ```js
 Array.prototype._map = function(fn) {
    if (typeof fn !== "function") {
-        throw Error('参数必须是一个函数');
+        throw Error('参数必须是一个函数')
     }
-    const res = [];
+    const res = []
     for (let i = 0, len = this.length; i < len; i++) {
-        res.push(fn(this[i]));
+        res.push(fn(this[i]))
     }
     return res;
 }
@@ -824,7 +853,6 @@ Array.prototype._map = function(fn) {
 ```js
 // 输入字符串s，以及其重复的次数，输出重复的结果，例如输入abc，2，输出abcabc。
 function repeat(s, n) {
-  console.log('====', new Array(n + 1))
     return (new Array(n + 1)).join(s);
 }
 
@@ -854,7 +882,7 @@ console.log(res) // olleh
 const pattern = /^[A-Z0-9]{13,15}$/
 ```
 
-## 将数字每千分位用逗号隔开??
+## 将数字每千分位用逗号隔开
 
 ```js
 // 数字有小数版本：
@@ -893,6 +921,8 @@ let format = n => {
         } else { // 是3的整数倍
             return num.slice(0, len).match(/\d{3}/g).join(',') 
         }
+
+        num.slice(0, len).match(/\d{3}/g).join(',')
     }
 }
 format(1232323)  // '1,232,323'
@@ -941,8 +971,8 @@ function sumBigNumber(a, b) {
 
 类数组对象是指具有类似数组的特性，但不完全是数组的对象。类数组对象通常具有以下特征：
 有一个length属性：用于表示对象中元素的数量。
-可以通过索引访问元素：例如 obj[0]、obj[1] 等。
-尽管类数组对象看起来像数组，但它们并不具备数组的所有方法（如 push、pop、forEach 等）。常见的类数组对象包括函数的参数对象（arguments）、DOM 方法返回的结果（如 NodeList、HTMLCollection）、以及字符串等。
+可以通过索引访问元素：例如obj[0]、obj[1] 等。
+尽管类数组对象看起来像数组，但它们并不具备数组的所有方法（如push、pop、forEach等）。常见的类数组对象包括函数的参数对象（arguments）、DOM方法返回的结果（如 NodeList、HTMLCollection）、以及字符串等。
 
 ## 实现类数组转化为数组
 
@@ -1007,7 +1037,7 @@ const tree = [
                 children: [
                     {
                         id: 3,
-                        pid: 1,
+                        pid: 2,
                         name: "div",
                     }
                 ]
@@ -1122,8 +1152,8 @@ const task = (timer, light, callback) => {
 }
 const step = () => {
     task(3000, 'red', () => {
-        task(2000, 'green', () => {
-            task(1000, 'yellow', step)
+        task(1000, 'green', () => {
+            task(2000, 'yellow', step)
         })
     })
 }
@@ -1150,8 +1180,8 @@ const task = (timer, light) =>
     })
 const step = () => {
     task(3000, 'red')
-        .then(() => task(2000, 'green'))
-        .then(() => task(2100, 'yellow'))
+        .then(() => task(1000, 'green'))
+        .then(() => task(2000, 'yellow'))
         .then(step)
 }
 step()
@@ -1177,8 +1207,8 @@ const task = async (timer, light) => {
 }
 const taskRunner =  async () => {
     await task(3000, 'red')
-    await task(2000, 'green')
-    await task(2100, 'yellow')
+    await task(1000, 'green')
+    await task(2000, 'yellow')
     taskRunner()
 }
 taskRunner()
@@ -1235,7 +1265,9 @@ imageAsync("url")
 ```js
 class EventCenter{
     // 1. 定义事件容器，用来装事件数组
-    let handlers = {}
+    constructor() {
+        this.handlers = {}
+    }
   
     // 2. 添加事件方法，参数：事件名 事件方法
     on(type, handler) {

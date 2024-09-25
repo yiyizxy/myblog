@@ -45,11 +45,11 @@ React 18不再支持Internet Explorer（IE）浏览器。这是React团队为了
 
 ## React设计思想
 
-组件化 ：React采用组件化的设计思想，可以将UI划分为一系列独立、可复用的组件，每个组件都有自己的状态和逻辑。这种方式可以使代码的复用性、可读性和维护性大大提高。
+组件化：React采用组件化的设计思想，可以将UI划分为一系列独立、可复用的组件，每个组件都有自己的状态和逻辑。这种方式可以使代码的复用性、可读性和维护性大大提高。
 
 声明式编程：React采用声明式编程模式，开发者只需要描述他们希望的最终状态，而不需要关心如何达到这个状态。这使得代码更加简洁，易于理解和预测。
 
-虚拟 DOM：React引入了虚拟DOM的概念，它是对真实DOM的轻量级表示。当组件的状态变化时，React会创建一个新的虚拟DOM，并与旧的虚拟DOM进行比较，然后只更新实际DOM中发生变化的部分。这种方式可以避免直接操作DOM，从而提高性能。
+虚拟DOM：React引入了虚拟DOM的概念，它是对真实DOM的轻量级表示。当组件的状态变化时，React会创建一个新的虚拟DOM，并与旧的虚拟DOM进行比较，然后只更新实际DOM中发生变化的部分。这种方式可以避免直接操作DOM，从而提高性能。
 
 单向数据流：React采用单向数据流（也被称为单向绑定），父组件可以将属性（props）传递给子组件，但子组件不能修改接收到的props。这种方式保证了数据的流动性和可预测性，也使得应用的状态管理变得更加容易。
 
@@ -179,7 +179,7 @@ class ExampleComponent extends React.Component {
 
 // nextProps: 接下来的props, prevState: 当前的state
   static getDerivedStateFromProps(nextProps, prevState) {
-    // 当 props.initialValue 发生变化时，同步更新 state.derivedValue
+    // 当props.initialValue发生变化时，同步更新state.derivedValue
     if (nextProps.initialValue !== prevState.derivedValue) {
       return {
         derivedValue: nextProps.initialValue,
@@ -204,7 +204,7 @@ export default ExampleComponent;
 使用场景
 
 1. 同步state和props：当组件的state需要根据props变化时，可以使用getDerivedStateFromProps来同步state和props。
-2. 替代componentWillReceiveProps：React 16.3 之后，componentWillReceiveProps被标记为不推荐使用（deprecated），可以使用getDerivedStateFromProps作为替代。
+2. 替代componentWillReceiveProps：React 16.3之后，componentWillReceiveProps被标记为不推荐使用（deprecated），可以使用getDerivedStateFromProps作为替代。
 
 ## getSnapshotBeforeUpdate(prevProps, prevState)使用
 
@@ -250,7 +250,7 @@ class ChatComponent extends React.Component {
 export default ChatComponent;
 ```
 
-## setState同步还是异步，setStat做了什么？
+## setState同步还是异步，setState做了什么？
 
 setState通常被认为是异步的，这意味着调用setState()时不会立刻改变react组件中state的值，多次setState函数调用产生的效果会合并。但是在promise、setTimeout、setInterval等定时器里变成了同步方法。
 React18以后，使用了createRoot api后，所有setState都是异步批量执行的，但如果你需要在某些情况下强制同步执行setState（例如，在测试或特定性能敏感的场景中），你可以使用flushSync函数。flushSync是React 18引入的一个新API，它允许你将传递给它的回调函数中的setState调用视为一个单独的更新批次，并立即执行这些更新。
@@ -267,19 +267,16 @@ React 16引入了Fiber架构，这是一种全新的协调引擎，通过增量�
 在React 16之前，React的渲染过程是通过一个称为“Stack Reconciler”的递归过程来完成的。这个过程在大型项目或复杂组件树中可能导致性能问题，因为它会长时间占用浏览器的主线程，导致页面卡顿和用户体验下降。
 
 Fiber架构的引入：
-
 为了解决这些问题，React 16引入了Fiber架构。Fiber是一个将渲染工作分成多个小的工作单元（称为“Fiber”）的架构，这些工作单元可以在多个帧中执行。这种拆分使得React能够在工作单元之间暂停和恢复，从而避免长时间占用主线程。
 
 主要特点：
-
 增量渲染：Fiber将渲染工作分成多个小的工作单元，这些单元可以在多个帧中执行。由于分成了更小的任务单元，在这些任务单元之间可以停顿，从而允许浏览器执行其他任务，如用户输入或动画。
 优先级调度：不同的任务根据其重要性被赋予不同的优先级。例如，用户输入等高优先级任务可以快速响应，而低优先级的任务（如数据获取）则可以在主线程空闲时执行。
 恢复和暂停：React可以在处理完一个工作单元后中断，检查是否有更高优先级的任务需要处理。如果有，则优先处理高优先级任务；否则，继续处理剩余的渲染任务。
 
-两阶段 & 两棵树：
-
-调度阶段（Reconciliation Phase） ：在这一阶段，React会计算需要更新的组件和对应的状态变更。这个阶段是可以被中断的，React会根据优先级逐步处理更新任务。
-提交阶段（Commit Phase） ：一旦调度阶段完成，提交阶段会将更新应用到实际的DOM中。这个阶段是同步的，React会确保所有的DOM变更在一次帧内完成。
+两阶段&两棵树：
+调度阶段（Reconciliation Phase）：在这一阶段，React会计算需要更新的组件和对应的状态变更。这个阶段是可以被中断的，React会根据优先级逐步处理更新任务。
+提交阶段（Commit Phase）：一旦调度阶段完成，提交阶段会将更新应用到实际的DOM中。这个阶段是同步的，React会确保所有的DOM变更在一次帧内完成。
 两棵树：Fiber架构在内存中包含了两棵树，一棵是当前树（已经渲染完成的树），另一棵是工作树（Work-in-Progress Tree）。这两棵树互相替换进行状态的更新。
 
 实现方式：
@@ -291,8 +288,8 @@ React重新设计了一种链表的vdom结构，每个节点称之为一个Fiber
 
 ## 什么是Fiber，Fiber解决了什么问题?
 
-React15的StackReconcile方案由于递归不可中断问题，如果 Diff 时间过长（JS计算时间），会造成页面 UI 的无响应（比如输入框）的表现，vdom 无法应用到 dom 中。
-为了解决这个问题，React16实现了新的基于requestIdleCallback的调度器（因为requestIdleCallback兼容性和稳定性问题，自己实现了polyfill），通过任务优先级的思想，在高优先级任务进入的时候，中断reconciler。为了适配这种新的调度器，推出了 FiberReconciler，将原来的树形结构（vdom）转换成 Fiber 链表的形式（child/sibling/return），整个Fiber的遍历是基于循环而非递归，可以随时中断。
+React15的StackReconcile方案由于递归不可中断问题，如果Diff时间过长（JS计算时间），会造成页面UI的无响应（比如输入框）的表现，vdom无法应用到dom中。
+为了解决这个问题，React16实现了新的基于requestIdleCallback的调度器（因为requestIdleCallback兼容性和稳定性问题，自己实现了polyfill），通过任务优先级的思想，在高优先级任务进入的时候，中断reconciler。为了适配这种新的调度器，推出了FiberReconciler，将原来的树形结构（vdom）转换成Fiber链表的形式（child/sibling/return），整个Fiber的遍历是基于循环而非递归，可以随时中断。
 更加核心的是，基于Fiber的链表结构，对于后续（React 17 lane 架构）的异步渲染和（可能存在的）worker计算都有非常好的应用基础
 
 React 16引入了Fiber架构，这是一种全新的协调引擎，通过增量渲染（拆分成多个小任务执行）、优先级调度（确保高优先级任务快速响应）和可中断恢复（允许在任务之间暂停和恢复）等机制，提高了React的性能和响应速度，使其能够更高效地处理复杂和高频的用户交互。
@@ -300,10 +297,10 @@ React 16引入了Fiber架构，这是一种全新的协调引擎，通过增量�
 增量渲染：Fiber将渲染工作分割成小的任务单元，能够在每一帧的时间内暂停和恢复渲染工作，从而不会阻塞浏览器的主线程，保证页面的交互性。
 优先级调度：可以为不同的更新任务设置优先级，优先处理更紧急和重要的更新，例如用户交互相关的更新。
 更高效的协调算法：通过新的算法更有效地对比新旧虚拟DOM，减少不必要的重新渲染，提高渲染性能。
-从实现角度来看，Fiber 为每个组件创建了一个 Fiber 节点，这些节点形成了一个链表结构，包含组件的各种信息，如类型、属性、状态等，方便进行高效的更新和协调操作。
-总之，Fiber 的引入极大地提升了 React 应用的性能和用户体验，使 React 能够更好地应对复杂和大规模的应用场景
+从实现角度来看，Fiber为每个组件创建了一个Fiber节点，这些节点形成了一个链表结构，包含组件的各种信息，如类型、属性、状态等，方便进行高效的更新和协调操作。
+总之，Fiber的引入极大地提升了React应用的性能和用户体验，使React能够更好地应对复杂和大规模的应用场景
 
-Fiber 是 React 16 引入的核心架构。
+Fiber是React 16引入的核心架构。
 Fiber 的主要目标是解决之前版本在渲染大型复杂组件树时可能出现的性能和用户体验问题。
 它带来了以下几个重要的改进：
 
@@ -380,7 +377,7 @@ try{}catch(err){}
 - props是外部传递给组件内部的数据，而state是在组件内被组件自己管理的，一般在constructor中初始化
 - props在组件内部是不可修改的，但state在组件内部可以被修改
 
-## super()和super(props)有什么区别？======待更新=====
+## super()和super(props)有什么区别？
 
 在ES6中,通过extends关键字实现类的继承，方式如下：
 
@@ -409,13 +406,6 @@ jack.printAge(); // 20
 
 在上面的例子中，可以看到通过super关键字实现调用父类，super代替的是父类的构造函数，使用super(name) 相当于调用sup.prototype.constructor.call(this,name)，如果在子类中不使用super会引发报错，原因是子类没有自己的this对象，它只能继承父类的this对象，然后对其进行加工，
 
-```js
- 1
-2
-3
-4 5} 6}
-```
-
 ## react函数组件和class类组件的区别
 
 - 编写形式：代码编写方式不一样，函数组件代码量较少，相比类组件更加简洁
@@ -430,7 +420,7 @@ jack.printAge(); // 20
 
 ## React事件机制
 
-React基于浏览器的事件机制实现了一套自身的事件机制，包括事件触发、事件冒泡、事件捕获、事件合成和事件派发等，叫做React的合成事件。React上所有的事件都挂载在document对象上，React17以后事件绑定在container上，ReactDOM.render(app,container)。
+React基于浏览器的事件机制实现了一套自身的事件机制，包括事件注册、事件触发、事件冒泡、事件捕获、事件合成和事件派发等，叫做React的合成事件。React上所有的事件都挂载在document对象上，React17以后事件绑定在container上，ReactDOM.render(app,container)。
 
 设计动机
 
@@ -500,9 +490,11 @@ function CustomForm ({handleSubmit}) {
 
 ## React事件处理为什么要手动绑定this
 
-react组件会被编译为React.createElement,在createElement中，它的this丢失了，并不是由组件实例调用的，因此���要手动绑定this
-为什么不能通过return false阻止事件的默认行为
-因为React基于浏览器的事件机制实现了一套自己的事件机制，和原生DOM事件不同，它采用了事件委托的思想，通过dispatch统一分发事件处理函数
+react组件会被编译为React.createElement,在createElement中，它的this丢失了，并不是由组件实例调用的，因此要手动绑定this
+
+## 为什么不能通过return false阻止事件的默认行为
+
+因为React基于浏览器的事件机制实现了一套自己的事件机制，和原生DOM事件不同，它采用了事件委托的思想，通过dispatch统一分发事件处理函数。
 
 ## React diff原理
 
@@ -510,7 +502,7 @@ react组件会被编译为React.createElement,在createElement中，它的this�
 - 列表结构的每个单元添加唯一的key属性，方便比较。
 - React只会匹配相同class的component（这里面的class指的是组件的名字）
 - 合并操作，调用component的setState方法的时候, React将其标记为dirty到每一个事件循环结束, React检查所有标记dirty的component重新绘制.
-- 选择性子树渲染。开发人员可以重写 shouldComponentUpdate 提高diff的性能。
+- 选择性子树渲染。开发人员可以重写shouldComponentUpdate提高diff的性能。
 
 ## 为什么虚拟dom会提高性能?
 
@@ -742,7 +734,7 @@ useEffect的回调执行
 
 ### useLayoutEffect
 
-**同步执行，阻塞浏览器绘制，适用于需要在 DOM 更新之后立即执行的操作。例如测量DOM元素尺寸、同步布局等。这些操作需要在浏览器绘制之前完成，以确保布局的一致性。**
+**同步执行，阻塞浏览器绘制，适用于需要在DOM更新之后立即执行的操作。例如测量DOM元素尺寸、同步布局等。这些操作需要在浏览器绘制之前完成，以确保布局的一致性。**
 执行过程是这样的：
 触发了一个导致重新渲染的操作（改变state、props改变）
 react重新渲染组件（调用）
@@ -780,7 +772,7 @@ export default MyComponent;
 
 ```js
 // createRef
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 
 class MyComponent extends Component {
   constructor(props) {
@@ -925,9 +917,8 @@ function FormComponent() {
 export default FormComponent;
 ```
 
-
 ```jsx
-// 在 SSR 和 CSR 之间保持一致的唯一标识符是 useId 的一个重要特性
+// 在SSR和CSR之间保持一致的唯一标识符是useId的一个重要特性
 import React, { useId } from 'react';
 import ReactDOMServer from 'react-dom/server';
 
@@ -1028,6 +1019,10 @@ function updateFunctionComponent(vnode, parentNode) {
   let vvnode = type(props)
   const node = createNode(vvnode, parentNode)
   return node
+}
+
+function updateNode() {
+  // 待补充
 }
 
 export default {
