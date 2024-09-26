@@ -151,7 +151,7 @@ package.json配置
 }
 ```
 
-或者根目录下配置.huskyrc.js，从 1.0.0 开始，husky的配置可以使用 .huskyrc、.huskyrc.json、.huskyrc.js 或 husky.config.js 文件
+或者根目录下配置.huskyrc.js，从1.0.0开始，husky的配置可以使用 .huskyrc、.huskyrc.json、.huskyrc.js 或 husky.config.js 文件
 
 ```js
 const tasks = arr => arr.join(' && ')
@@ -178,12 +178,20 @@ module.exports = {
 lint-staged是一个在git暂存文件上（也就是被 git add 的文件）运行已配置的linter（或其他）任务。lint-staged总是将所有暂存文件的列表传递给任务。
 
 ```json
-"lint-staged": {
-  "src/**/*.{js,vue}": [
-    "prettier --write",
-    "eslint --cache --fix",
-    "git add"
-  ]
+{
+  "lint-staged": {
+    "src/**/*.{js,vue}": [
+      "prettier --write",
+      "eslint --cache --fix",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  }
 }
 ```
 

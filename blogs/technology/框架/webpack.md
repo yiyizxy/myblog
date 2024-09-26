@@ -236,7 +236,7 @@ Rollup是一款ES Module打包器， 从作用上来看，Rollup与Webpack非常
 
 ## vite生产环境下，为什么不用esbuild打包呢？
 
-尽管esbuild的打包速度比rollup更快，但 Vite 目前的插件 API 与使用 esbuild 作为打包器并不兼容，rollup插件api与基础建设更加完善，所以在生产环境vite使用rollup打包会更稳定一些。
+尽管esbuild的打包速度比rollup更快，但 Vite 目前的插件API与使用 esbuild作为打包器并不兼容，rollup插件api与基础建设更加完善，所以在生产环境vite使用rollup打包会更稳定一些。
 如果后面esbuild基础建设与生态更加完善后，esbuild还是更有优势的。
 所以使用vite可能会带来开发环境与生产环境打包结果不一致的问题。
 
